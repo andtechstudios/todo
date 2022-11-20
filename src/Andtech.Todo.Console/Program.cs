@@ -1,4 +1,5 @@
-﻿using Andtech.Todo;
+﻿using Andtech.Common;
+using Andtech.Todo;
 using Andtech.Todo.Console;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -19,8 +20,15 @@ public partial class Program
 
 		cts = new CancellationTokenSource();
 
-		var token = cts.Token;
-		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
+		try
+		{
+			var token = cts.Token;
+			await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
+		}
+		catch (Exception ex)
+		{
+			Log.Error.WriteLine(ex.Message);
+		}
 
 		cts.Cancel();
 		cts.Dispose();

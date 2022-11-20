@@ -3,11 +3,10 @@ using Spectre.Console;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static Program;
-using System.Xml.Linq;
 
 public class TodoListScreen
 {
+	private Layout layout;
 	private Table table;
 	private List<TaskRenderer> elements;
 
@@ -15,10 +14,50 @@ public class TodoListScreen
 
 	public async Task DrawGUIAsync(CancellationToken cancellationToken = default)
 	{
+		table = GetTodoListTable();
+		layout = GetLayout();
+
+		await AnsiConsole.Live(layout)
+			.AutoClear(true)
+			.StartAsync(ctx => RefreshAsync(ctx, cancellationToken: cancellationToken));
+	}
+
+	Layout GetLayout()
+	{
 		var layout = new Layout();
 
-		AnsiConsole.Write(new Rule("[white]General[/]"));
+		layout.SplitRows(
+			new Layout("Ribbon").Size(4),
+			new Layout("Body"),
+			new Layout("Bottom").Size(4)
+		);
 
+		layout["Ribbon"].Update(
+			new Panel(
+					new Text("General | Work | School"))
+				//.NoBorder()
+				.Padding(0, 0)
+				.Expand());
+
+		layout["Body"].Update(
+			new Panel(
+					table)
+				//.NoBorder()
+				.Padding(0, 0)
+				.Expand());
+
+		layout["Bottom"].Update(
+			new Panel(
+					new Text("Prompt\nConsole"))
+				//.NoBorder()
+				.Padding(0, 0)
+				.Expand());
+
+		return layout;
+	}
+
+	Table GetTodoListTable()
+	{
 		var taskList = Session.Instance.Lists[0];
 		elements = new List<TaskRenderer>();
 		foreach (var item in taskList.Tasks)
@@ -28,8 +67,7 @@ public class TodoListScreen
 		}
 
 		int n = elements.Count;
-		table = new Table()
-			.Expand()
+		var table = new Table()
 			.NoBorder()
 			.HideHeaders();
 		table.AddColumn("Content");
@@ -39,12 +77,9 @@ public class TodoListScreen
 
 			table.AddRow(text);
 		}
+		table.Expand();
 
-		await AnsiConsole.Live(table)
-			.AutoClear(true)
-			.Overflow(VerticalOverflow.Ellipsis)
-			.Cropping(VerticalOverflowCropping.Bottom)
-			.StartAsync(ctx => RefreshAsync(ctx, cancellationToken: cancellationToken));
+		return table;
 	}
 
 	void Rebuild()
@@ -70,11 +105,9 @@ public class TodoListScreen
 		{
 			// Refresh and wait for a while
 			context.Refresh();
-			await Task.Delay(16, cancellationToken: cancellationToken);
-
 			Rebuild();
+
+			await Task.Delay(500, cancellationToken: cancellationToken);
 		}
 	}
-
 }
-
