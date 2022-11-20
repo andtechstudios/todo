@@ -27,12 +27,17 @@ public class Program
 		public string Render()
 		{
 			var symbol = task.Complete ? "☒" : "☐";
+			var content = task.Title.EscapeMarkup();
+			if (task.Complete)
+			{
+				content = $"[dim]{content}[/]";
+			}
 			var text = string.Join(" ",
 				symbol,
-				task.Title,
+				content,
 				task.Description
 				);
-			var markup = $"{text}".EscapeMarkup();
+			var markup = text;
 
 			return markup;
 		}
