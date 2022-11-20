@@ -19,12 +19,12 @@ namespace Andtech.Todo
 			_segment = Segment.Control(control);
 		}
 
-		protected override Measurement Measure(RenderContext options, int maxWidth)
+		protected override Measurement Measure(RenderOptions options, int maxWidth)
 		{
 			return new Measurement(0, 0);
 		}
 
-		protected override IEnumerable<Segment> Render(RenderContext options, int maxWidth)
+		protected override IEnumerable<Segment> Render(RenderOptions options, int maxWidth)
 		{
 			if (options.Ansi)
 			{
