@@ -38,16 +38,21 @@ public class Program
 		}
 	}
 
+	private static CancellationTokenSource cts;
 	static Table table;
-
 	private static List<TaskRenderer> elements;
-	private static Task mainTask;
 
 	public static async Task Main(string[] args)
 	{
 		Init();
 
-		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, GuiLoopAsync);
+		cts = new CancellationTokenSource();
+
+		var token = cts.Token;
+		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => GuiLoopAsync(cancellationToken: token));
+
+		cts.Cancel();
+		cts.Dispose();
 	}
 
 	static void Init()
@@ -60,11 +65,11 @@ public class Program
 		session.Lists.Add(TodoList.Read(session.ProjectDir + "/todo.md"));
 	}
 
-	static async Task InputLoopAsync()
+	static async Task InputLoopAsync(CancellationToken cancellationToken)
 	{
 		while (true)
 		{
-			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(true, cancellationToken: CancellationToken.None);
+			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(true, cancellationToken: cancellationToken);
 
 			if (keyInfo.HasValue)
 			{
@@ -94,6 +99,7 @@ public class Program
 						case ConsoleModifiers.Control:
 							if (keyInfo.Value.Key == ConsoleKey.Q)
 							{
+								cts.Cancel();
 								return;
 							}
 							break;
@@ -105,9 +111,9 @@ public class Program
 
 	static int lineNumber = 0;
 
-	static async Task GuiLoopAsync()
+	static async Task GuiLoopAsync(CancellationToken cancellationToken)
 	{
-		var inputTask = InputLoopAsync();
+		var inputTask = InputLoopAsync(cancellationToken: cancellationToken);
 		AnsiConsole.Write(new Rule("[white]General[/]"));
 
 		var taskList = Session.Instance.Lists[0];
@@ -135,21 +141,19 @@ public class Program
 			.AutoClear(true)
 			.Overflow(VerticalOverflow.Ellipsis)
 			.Cropping(VerticalOverflowCropping.Bottom)
-			.StartAsync(RefreshAsync);
+			.StartAsync(ctx => RefreshAsync(ctx, cancellationToken: cancellationToken));
 
 		await Task.WhenAny(inputTask, liveTask);
-
-		AnsiConsole.Clear();
 	}
 
-	static async Task RefreshAsync(LiveDisplayContext context)
+	static async Task RefreshAsync(LiveDisplayContext context, CancellationToken cancellationToken = default)
 	{
 		// Continously update the table
 		while (true)
 		{
 			// Refresh and wait for a while
 			context.Refresh();
-			await Task.Delay(16);
+			await Task.Delay(16, cancellationToken: cancellationToken);
 
 			for (int i = 0; i < table.Rows.Count; i++)
 			{
