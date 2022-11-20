@@ -1,21 +1,27 @@
 # Deploy to GitLab
 
+## Global
+| Keybinding | Action |
+| --- | --- |
+| Ctrl + Q | Quit |
+
 ## Navigation
 | Keybinding | Action |
 | --- | --- |
-| Arrow Left | Collapse Parent |
-| Arrow Right | Expand Node |
-| Arrow Down | Highlight Down |
-| Arrow Up | Highlight Up |
+| Left | Collapse Parent |
+| Right | Expand Node |
+| Down | Highlight Down |
+| Up | Highlight Up |
+| Alt + Left | Collapse Parent (Recursive) |
+| Alt + Right | Expand Node (Recursive) |
+| Alt + Down | Move Down |
+| Alt + Up | Move Up |
 
-# Controls
+## Editing
 | Keybinding | Action |
 | --- | --- |
 | Space | Toggle Completion |
-| Tab | Increase Indent |
-| Shift + Tab | Decrease Indent |
-| Alt + Up | Move Up |
-| Alt + Down | Move Down |
 | Return | Edit/End Edit |
 | Escape | Cancel Edit |
-| Ctrl + Q | Quit |
+| Tab | Increase Indent |
+| Shift + Tab | Decrease Indent |
