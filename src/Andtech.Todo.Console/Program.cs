@@ -45,19 +45,27 @@ public partial class Program
 		input.OnQuit += Input_OnQuit;
 		input.OnLineDown += Input_OnLineDown;
 		input.OnLineUp += Input_OnLineUp;
+		input.OnSubmit += Input_OnSubmit;
 		var inputTask = input.RunAsync(cancellationToken: cancellationToken);
 
 		await Task.WhenAny(inputTask, guiTask);
 
+		void Input_OnSubmit()
+		{
+			var task = Session.Instance.Lists[0].Tasks[screen.CursorLineNumber];
+			task.Complete = !task.Complete;
+			screen.MarkDirty();
+		}
+
 		void Input_OnLineUp()
 		{
-			screen.LineNumber--;
+			screen.CursorLineNumber--;
 			screen.MarkDirty();
 		}
 
 		void Input_OnLineDown()
 		{
-			screen.LineNumber++;
+			screen.CursorLineNumber++;
 			screen.MarkDirty();
 		}
 

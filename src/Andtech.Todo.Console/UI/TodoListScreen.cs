@@ -4,6 +4,7 @@ using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,10 +12,13 @@ public class TodoListScreen
 {
 	private Layout layout;
 	private Table table;
-	private List<TaskRenderer> elements;
+	private List<TaskRenderer> tree;
+	private int RibbonHeight => layout["ribbon"]?.Size ?? 0;
+	private int PromptHeight => layout["prompt"]?.Size ?? 0;
+	private int BodyHeight => Console.LargestWindowHeight - RibbonHeight - PromptHeight;
 
-	public int LineNumber { get; set; }
-	public int WindowLineNumberBegin { get; set; }
+	public int CursorLineNumber { get; set; }
+	public int WindowLineNumber { get; set; }
 
 	LiveDisplayContext context;
 
@@ -22,8 +26,10 @@ public class TodoListScreen
 	{
 		try
 		{
-		table = GetTodoListTable();
-		layout = GetLayout();
+			table = GetTodoListTable();
+			layout = GetLayout();
+
+			AnsiConsole.Write(layout);
 
 			await AnsiConsole.Live(layout)
 				.AutoClear(false)
@@ -42,21 +48,21 @@ public class TodoListScreen
 		var layout = new Layout();
 
 		layout.SplitRows(
-			new Layout("Ribbon").Size(4),
-			new Layout("Body").Ratio(100),
-			new Layout("Bottom").Size(4)
+			new Layout("ribbon").Size(4),
+			new Layout("body").Ratio(100),
+			new Layout("prompt").Size(4)
 		);
 
-		layout["Ribbon"].Update(
+		layout["ribbon"].Update(
 			new Panel(
 					new Text("General | Work | School"))
 				//.NoBorder()
 				.Padding(0, 0)
 				.Expand());
 
-		layout["Body"].Update(table);
+		layout["body"].Update(table);
 
-		layout["Bottom"].Update(
+		layout["prompt"].Update(
 			new Panel(
 					new Text("Prompt\nConsole"))
 				//.NoBorder()
@@ -69,14 +75,14 @@ public class TodoListScreen
 	Table GetTodoListTable()
 	{
 		var taskList = Session.Instance.Lists[0];
-		elements = new List<TaskRenderer>();
+		tree = new List<TaskRenderer>();
 		foreach (var item in taskList.Tasks)
 		{
 			var element = new TaskRenderer(item);
-			elements.Add(element);
+			tree.Add(element);
 		}
 
-		int n = elements.Count;
+		int n = tree.Count;
 		var table = new Table()
 			.NoBorder()
 			.HideHeaders();
@@ -94,24 +100,49 @@ public class TodoListScreen
 
 	void Rebuild()
 	{
-		var height = Console.BufferHeight;
-		for (int i = 0; i < height; i++)
-		{
-			var index = i + 0;
+		RebuildCursor();
 
-			if (index < elements.Count)
+		layout["prompt"].Update(new Text($"Line: {CursorLineNumber} (Window: {WindowLineNumber}) (Size: {BodyHeight}) {tree.Count}"));
+
+		for (int visibleLineNumber = 0; visibleLineNumber < BodyHeight; visibleLineNumber++)
+		{
+			var index = visibleLineNumber + WindowLineNumber;
+
+			if (index < tree.Count)
 			{
-				var text = elements[index].Render();
-				if (index == LineNumber)
+				var text = tree[index].Render();
+				if (index == CursorLineNumber)
 				{
 					text = $"[blue]{text}[/]";
 				}
-				table.Rows.Update(i, 0, new Markup(text));
+				table.Rows.Update(visibleLineNumber, 0, new Markup(text));
 			}
 			else
 			{
-				table.Rows.Update(i, 0, new Text(string.Empty));
+				table.Rows.Update(visibleLineNumber, 0, new Text($"{visibleLineNumber + 1} of {BodyHeight} of {Console.LargestWindowHeight}"));
 			}
+		}
+	}
+
+	void RebuildCursor()
+	{
+		if (CursorLineNumber < 0)
+		{
+			CursorLineNumber = 0;
+		}
+		if (CursorLineNumber > tree.Count - 1)
+		{
+			CursorLineNumber = tree.Count - 1;
+		}
+
+		if (CursorLineNumber < WindowLineNumber)
+		{
+			WindowLineNumber = CursorLineNumber;
+		}
+
+		if (CursorLineNumber >= WindowLineNumber + BodyHeight)
+		{
+			WindowLineNumber = CursorLineNumber - BodyHeight + 1;
 		}
 	}
 
@@ -119,6 +150,10 @@ public class TodoListScreen
 	public void MarkDirty()
 	{
 		isDirty = true;
+		AnsiConsole.Cursor.Hide();
+		Rebuild();
+		context.Refresh();
+		AnsiConsole.Cursor.Show();
 	}
 
 	async Task RefreshAsync(LiveDisplayContext context, CancellationToken cancellationToken = default)
@@ -130,12 +165,12 @@ public class TodoListScreen
 		{
 			if (isDirty)
 			{
-				Rebuild();
-				context.Refresh();
+				//Rebuild();
+				//context.Refresh();
 			}
 			isDirty = false;
 
-			await Task.Delay(10, cancellationToken: cancellationToken);
+			await Task.Delay(1000, cancellationToken: cancellationToken);
 
 			// Refresh and wait for a while
 		}
