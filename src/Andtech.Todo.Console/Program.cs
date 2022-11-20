@@ -2,6 +2,7 @@
 using Andtech.Todo.Console;
 using Spectre.Console;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -21,8 +22,42 @@ public class Program
         var session = Session.Instance;
         session.Lists.Add(TodoList.Read(session.ProjectDir + "/todo.md"));
 
+        var thread = new Thread(InputLoop);
+        thread.Start();
+
         DoScreen();
     }
+
+    static void InputLoop()
+	{
+        while (true)
+        {
+            var keyInfo = AnsiConsole.Console.Input.ReadKey(true);
+            if (keyInfo.HasValue)
+            {
+                AnsiConsole.MarkupLine($"{keyInfo.Value.Modifiers} + {keyInfo.Value.Key}");
+
+                if (keyInfo.Value.Modifiers == 0)
+				{
+					switch (keyInfo.Value.Key)
+					{
+                        case ConsoleKey.DownArrow:
+                            lineNumber++;
+                            break;
+                        case ConsoleKey.UpArrow:
+                            lineNumber--;
+                            break;
+                    }
+				}
+				else
+				{
+
+				}
+            }
+        }
+	}
+
+    static int lineNumber = 0;
 
     static void DoScreen()
     {
@@ -31,57 +66,46 @@ public class Program
 
     static void MainScreen()
     {
-        // Now we're in another terminal screen buffer
-        AnsiConsole.Write(new Rule("[white]Todo[/]"));
-        AnsiConsole.Write(new Panel(new Text("Left adjusted").LeftAligned())
-            .NoBorder()
-            .Padding(0, 0)
-            .Expand());
-        AnsiConsole.Write(new Panel(new Text("Right adjusted").RightAligned())
-            .NoBorder()
-            .Expand());
-
-        var taskList = Session.Instance.Lists[0];
-        foreach(var item in taskList.Tasks)
-        {
-            AnsiConsole.MarkupLineInterpolated($"[red]{item.Title}[/]");
-        }
-        
-        AnsiConsole.MarkupLine("[grey]\nPress a key to return[/]");
-
-        var keyInfo = AnsiConsole.Console.Input.ReadKey(true);
-
-        AnsiConsole.MarkupLine(keyInfo.Value.Key.ToString());
-
-        Thread.Sleep(1000);
+        GoAsync();
     }
 
-    static void DoTable()
+    static async Task GoAsync()
     {
+        AnsiConsole.Write(new Rule("[white]General[/]"));
 
+        var table = new Table().Expand().BorderColor(Color.Grey);
+        table.AddColumn("[yellow]Content[/]");
 
-        table = new Table()
-            .Border(TableBorder.None);
-        table.AddColumn("Item");
-        table.AddColumn("Price");
-        table.AddRow("Apple", "$100");
+        int n = 8;
 
-        var display = AnsiConsole.Live(table);
-        display.Start(Loop);
+        await AnsiConsole.Live(table)
+            .AutoClear(false)
+            .Overflow(VerticalOverflow.Ellipsis)
+            .Cropping(VerticalOverflowCropping.Bottom)
+            .StartAsync(async ctx =>
+            {
+                var taskList = Session.Instance.Lists[0];
+                foreach (var item in taskList.Tasks)
+                {
+                    var symbol = item.Complete ? "✓" : " ";
+                    var text = string.Join(" ",
+                        $"[{symbol}]",
+                        item.Title,
+                        item.Description
+                    );
+                    var markup = $"• {text}".EscapeMarkup();
 
-        Thread.Sleep(1000);
-        Console.WriteLine("update");
-        table.Rows.Update(0, 0, new Markup("Banana"));
-        Thread.Sleep(1000);
-    }
+                    table.AddRow(markup);
+                }
 
-    static void Loop(LiveDisplayContext ctx)
-    {
-        while (true)
-        {
-            ctx.Refresh();
-            Thread.Sleep(23);
-        }
+                // Continously update the table
+                while (true)
+                {
+                    // Refresh and wait for a while
+                    ctx.Refresh();
+                    await Task.Delay(400);
+                }
+            });
     }
 }
 

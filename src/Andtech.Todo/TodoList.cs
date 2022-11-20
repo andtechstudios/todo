@@ -19,7 +19,6 @@ namespace Andtech.Todo
 				Tasks = new List<TodoTask>(),
 			};
 
-			Console.WriteLine(path);
 			var text = File.ReadAllText(path);
 			foreach (var line in text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries))
 			{
