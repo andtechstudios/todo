@@ -9,32 +9,6 @@
 		<PackageId>Andtech.Todo</PackageId>
 		<RootNamespace>$(PackageId)</RootNamespace>
 	</PropertyGroup>
-
-	<!-- dotnet-tool -->
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<ToolCommandName>todo</ToolCommandName>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	</PropertyGroup>
-	<Choose>
-		<When Condition=" '$(Configuration)'=='Release' ">
-			<PropertyGroup>
-				<PackAsTool>true</PackAsTool>
-			</PropertyGroup>
-		</When>
-	</Choose>
-
-	<!-- Linux Debugging -->
-	<Choose>
-		<When Condition=" '$(Configuration)'=='Debug' ">
-			<PropertyGroup>
-				<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
-			</PropertyGroup>
-		</When>
-	</Choose>
-	<ItemGroup>
-	  <PackageReference Include="Spectre.Console" Version="0.45.0" />
-	</ItemGroup>
 	
 	<!-- NuGet Packages -->
 </Project>
