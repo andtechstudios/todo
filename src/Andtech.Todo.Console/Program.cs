@@ -1,45 +1,22 @@
 ﻿using Andtech.Todo;
 using Andtech.Todo.Console;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class Program
+public partial class Program
 {
 
-	public class TaskRenderer
+	public class TodoListScreen
 	{
-		private readonly TodoTask task;
 
-		public TaskRenderer(TodoTask task)
+		public async Task DrawGUI()
 		{
-			this.task = task;
-		}
-
-		public void Submit()
-		{
-			task.Complete = !task.Complete;
-		}
-
-		public string Render()
-		{
-			var symbol = task.Complete ? "☒" : "☐";
-			var content = task.Title.EscapeMarkup();
-			if (task.Complete)
-			{
-				content = $"[dim]{content}[/]";
-			}
-			var text = string.Join(" ",
-				symbol,
-				content,
-				task.Description
-				);
-			var markup = text;
-
-			return markup;
+			var layout = new Layout();
 		}
 	}
 
