@@ -1,4 +1,5 @@
-﻿using Spectre.Console.Rendering;
+﻿using Spectre.Console;
+using Spectre.Console.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
@@ -18,12 +19,12 @@ namespace Andtech.Todo
 			_segment = Segment.Control(control);
 		}
 
-		protected override Measurement Measure(Spectre.Console.Rendering.RenderOptions options, int maxWidth)
+		protected override Measurement Measure(RenderContext options, int maxWidth)
 		{
 			return new Measurement(0, 0);
 		}
 
-		protected override IEnumerable<Segment> Render(RenderOptions options, int maxWidth)
+		protected override IEnumerable<Segment> Render(RenderContext options, int maxWidth)
 		{
 			if (options.Ansi)
 			{
@@ -32,7 +33,45 @@ namespace Andtech.Todo
 		}
 	}
 
-	internal class SpectreExtensions
+	public static class SpectreExtensions
 	{
+
+		/// <summary>
+		/// Switches to an alternate screen buffer asynchronously if the terminal supports it.
+		/// </summary>
+		/// <param name="console">The console.</param>
+		/// <param name="action">The action to execute within the alternate screen buffer.</param>
+		/// <returns>The result of the function.</returns>
+		public static async Task AlternateScreenAsync(this IAnsiConsole console, Func<Task> action)
+		{
+			if (console is null)
+			{
+				throw new ArgumentNullException(nameof(console));
+			}
+
+			if (!console.Profile.Capabilities.Ansi)
+			{
+				throw new NotSupportedException("Alternate buffers are not supported since your terminal does not support ANSI.");
+			}
+
+			if (!console.Profile.Capabilities.AlternateBuffer)
+			{
+				throw new NotSupportedException("Alternate buffers are not supported by your terminal.");
+			}
+
+			// Switch to alternate screen
+			console.Write(new ControlCode("\u001b[?1049h\u001b[H"));
+
+			try
+			{
+				// Execute custom action
+				await action();
+			}
+			finally
+			{
+				// Switch back to primary screen
+				console.Write(new ControlCode("\u001b[?1049l"));
+			}
+		}
 	}
 }

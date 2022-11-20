@@ -45,24 +45,27 @@ public class Program
 
 	public static async Task Main(string[] args)
 	{
+		Init();
+
+		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, GuiLoopAsync);
+	}
+
+	static void Init()
+	{
 		Session.Instance = new Session()
 		{
 			ProjectDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "todo"),
 		};
 		var session = Session.Instance;
 		session.Lists.Add(TodoList.Read(session.ProjectDir + "/todo.md"));
-
-		var thread = new Thread(InputLoop);
-		thread.Start();
-
-		await StartGuiLoop();
 	}
 
-	static void InputLoop()
+	static async Task InputLoopAsync()
 	{
 		while (true)
 		{
-			var keyInfo = AnsiConsole.Console.Input.ReadKey(true);
+			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(true, cancellationToken: CancellationToken.None);
+
 			if (keyInfo.HasValue)
 			{
 				//AnsiConsole.MarkupLine($"{keyInfo.Value.Modifiers} + {keyInfo.Value.Key}");
@@ -91,8 +94,7 @@ public class Program
 						case ConsoleModifiers.Control:
 							if (keyInfo.Value.Key == ConsoleKey.Q)
 							{
-								Console.Clear();
-								Environment.Exit(0);
+								return;
 							}
 							break;
 					}
@@ -103,9 +105,9 @@ public class Program
 
 	static int lineNumber = 0;
 
-	static Task StartGuiLoop()
+	static async Task GuiLoopAsync()
 	{
-		AnsiConsole.Clear();
+		var inputTask = InputLoopAsync();
 		AnsiConsole.Write(new Rule("[white]General[/]"));
 
 		var taskList = Session.Instance.Lists[0];
@@ -129,11 +131,15 @@ public class Program
 			table.AddRow(text);
 		}
 
-		return AnsiConsole.Live(table)
+		var liveTask = AnsiConsole.Live(table)
 			.AutoClear(true)
 			.Overflow(VerticalOverflow.Ellipsis)
 			.Cropping(VerticalOverflowCropping.Bottom)
 			.StartAsync(RefreshAsync);
+
+		await Task.WhenAny(inputTask, liveTask);
+
+		AnsiConsole.Clear();
 	}
 
 	static async Task RefreshAsync(LiveDisplayContext context)
