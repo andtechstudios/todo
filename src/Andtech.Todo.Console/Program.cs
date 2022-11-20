@@ -25,7 +25,7 @@ public class Program
         var thread = new Thread(InputLoop);
         thread.Start();
 
-        DoScreen();
+        await DoGuiAsync();
     }
 
     static void InputLoop()
@@ -35,7 +35,7 @@ public class Program
             var keyInfo = AnsiConsole.Console.Input.ReadKey(true);
             if (keyInfo.HasValue)
             {
-                AnsiConsole.MarkupLine($"{keyInfo.Value.Modifiers} + {keyInfo.Value.Key}");
+                //AnsiConsole.MarkupLine($"{keyInfo.Value.Modifiers} + {keyInfo.Value.Key}");
 
                 if (keyInfo.Value.Modifiers == 0)
 				{
@@ -43,9 +43,11 @@ public class Program
 					{
                         case ConsoleKey.DownArrow:
                             lineNumber++;
+                            table.Rows.Update(lineNumber, 0, new Text("DOWN\n  description"));
                             break;
                         case ConsoleKey.UpArrow:
                             lineNumber--;
+                            table.Rows.Update(lineNumber, 0, new Text("UP"));
                             break;
                     }
 				}
@@ -59,27 +61,18 @@ public class Program
 
     static int lineNumber = 0;
 
-    static void DoScreen()
+    static async Task DoGuiAsync()
     {
-        AnsiConsole.AlternateScreen(MainScreen);
-    }
-
-    static void MainScreen()
-    {
-        GoAsync();
-    }
-
-    static async Task GoAsync()
-    {
+        AnsiConsole.Clear();
         AnsiConsole.Write(new Rule("[white]General[/]"));
 
-        var table = new Table().Expand().BorderColor(Color.Grey);
-        table.AddColumn("[yellow]Content[/]");
+        table = new Table().Expand().BorderColor(Color.Grey).NoBorder().HideHeaders();
+            table.AddColumn("Content");
 
         int n = 8;
 
         await AnsiConsole.Live(table)
-            .AutoClear(false)
+            .AutoClear(true)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Bottom)
             .StartAsync(async ctx =>
@@ -103,7 +96,7 @@ public class Program
                 {
                     // Refresh and wait for a while
                     ctx.Refresh();
-                    await Task.Delay(400);
+                    await Task.Delay(16);
                 }
             });
     }

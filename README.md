@@ -1,3 +1,13 @@
+# Deploy to GitLab
+
+## Navigation
+| Keybinding | Action |
+| --- | --- |
+| Arrow Left | Collapse Parent |
+| Arrow Right | Expand Node |
+| Arrow Down | Highlight Down |
+| Arrow Up | Highlight Up |
+
 # Controls
 | Keybinding | Action |
 | --- | --- |
