@@ -20,15 +20,8 @@ public partial class Program
 
 		cts = new CancellationTokenSource();
 
-		try
-		{
-			var token = cts.Token;
-			await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
-		}
-		catch (Exception ex)
-		{
-			Log.Error.WriteLine(ex.Message);
-		}
+		var token = cts.Token;
+		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
 
 		cts.Cancel();
 		cts.Dispose();
@@ -50,14 +43,28 @@ public partial class Program
 		var guiTask = screen.DrawGUIAsync(cancellationToken: cancellationToken);
 		var input = new InputLogic();
 		input.OnQuit += Input_OnQuit;
+		input.OnLineDown += Input_OnLineDown;
+		input.OnLineUp += Input_OnLineUp;
 		var inputTask = input.RunAsync(cancellationToken: cancellationToken);
 
 		await Task.WhenAny(inputTask, guiTask);
-	}
 
-	static void Input_OnQuit()
-	{
-		cts?.Cancel();
+		void Input_OnLineUp()
+		{
+			screen.LineNumber--;
+			screen.MarkDirty();
+		}
+
+		void Input_OnLineDown()
+		{
+			screen.LineNumber++;
+			screen.MarkDirty();
+		}
+
+		void Input_OnQuit()
+		{
+			cts?.Cancel();
+		}
 	}
 }
 

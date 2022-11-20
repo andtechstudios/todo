@@ -1,6 +1,9 @@
-﻿using Andtech.Todo.Console;
+﻿using Andtech.Common;
+using Andtech.Todo.Console;
 using Spectre.Console;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,16 +13,28 @@ public class TodoListScreen
 	private Table table;
 	private List<TaskRenderer> elements;
 
-	static int lineNumber = 0;
+	public int LineNumber { get; set; }
+	public int WindowLineNumberBegin { get; set; }
+
+	LiveDisplayContext context;
 
 	public async Task DrawGUIAsync(CancellationToken cancellationToken = default)
 	{
+		try
+		{
 		table = GetTodoListTable();
 		layout = GetLayout();
 
-		await AnsiConsole.Live(layout)
-			.AutoClear(true)
-			.StartAsync(ctx => RefreshAsync(ctx, cancellationToken: cancellationToken));
+			await AnsiConsole.Live(layout)
+				.AutoClear(false)
+				.Cropping(VerticalOverflowCropping.Bottom)
+				.StartAsync(ctx => RefreshAsync(ctx, cancellationToken: cancellationToken));
+		}
+		catch (Exception ex)
+		{
+			Log.Error.WriteLine(ex.Message);
+			AnsiConsole.Console.Input.ReadKey(true);
+		}
 	}
 
 	Layout GetLayout()
@@ -28,7 +43,7 @@ public class TodoListScreen
 
 		layout.SplitRows(
 			new Layout("Ribbon").Size(4),
-			new Layout("Body"),
+			new Layout("Body").Ratio(100),
 			new Layout("Bottom").Size(4)
 		);
 
@@ -39,12 +54,7 @@ public class TodoListScreen
 				.Padding(0, 0)
 				.Expand());
 
-		layout["Body"].Update(
-			new Panel(
-					table)
-				//.NoBorder()
-				.Padding(0, 0)
-				.Expand());
+		layout["Body"].Update(table);
 
 		layout["Bottom"].Update(
 			new Panel(
@@ -70,12 +80,12 @@ public class TodoListScreen
 		var table = new Table()
 			.NoBorder()
 			.HideHeaders();
-		table.AddColumn("Content");
-		foreach (var renderer in elements)
-		{
-			var text = renderer.Render();
 
-			table.AddRow(text);
+		var height = Console.BufferHeight;
+		table.AddColumn("Content");
+		foreach (var i in Enumerable.Range(0, height))
+		{
+			table.AddRow("");
 		}
 		table.Expand();
 
@@ -84,30 +94,50 @@ public class TodoListScreen
 
 	void Rebuild()
 	{
-		for (int i = 0; i < table.Rows.Count; i++)
+		var height = Console.BufferHeight;
+		for (int i = 0; i < height; i++)
 		{
-			var row = i + 0;
+			var index = i + 0;
 
-			var text = elements[row].Render();
-			if (row == lineNumber)
+			if (index < elements.Count)
 			{
-				text = $"[blue]{text}[/]";
+				var text = elements[index].Render();
+				if (index == LineNumber)
+				{
+					text = $"[blue]{text}[/]";
+				}
+				table.Rows.Update(i, 0, new Markup(text));
 			}
-
-			table.Rows.Update(row, 0, new Markup(text));
+			else
+			{
+				table.Rows.Update(i, 0, new Text(string.Empty));
+			}
 		}
+	}
+
+	bool isDirty;
+	public void MarkDirty()
+	{
+		isDirty = true;
 	}
 
 	async Task RefreshAsync(LiveDisplayContext context, CancellationToken cancellationToken = default)
 	{
+		this.context = context;
+
 		// Continously update the table
 		while (true)
 		{
-			// Refresh and wait for a while
-			context.Refresh();
-			Rebuild();
+			if (isDirty)
+			{
+				Rebuild();
+				context.Refresh();
+			}
+			isDirty = false;
 
-			await Task.Delay(500, cancellationToken: cancellationToken);
+			await Task.Delay(10, cancellationToken: cancellationToken);
+
+			// Refresh and wait for a while
 		}
 	}
 }

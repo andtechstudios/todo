@@ -24,10 +24,10 @@ public class InputLogic
 					switch (keyInfo.Value.Key)
 					{
 						case ConsoleKey.DownArrow:
-							OnLineUp?.Invoke();
+							OnLineDown?.Invoke();
 							break;
 						case ConsoleKey.UpArrow:
-							OnLineDown?.Invoke();
+							OnLineUp?.Invoke();
 							break;
 						case ConsoleKey.Spacebar:
 							OnSubmit?.Invoke();
