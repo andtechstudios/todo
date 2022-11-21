@@ -5,10 +5,14 @@
 		<RepositoryUrl>https://github.com/andtechstudios/todo</RepositoryUrl>
 		<Copyright>"© $(CompanyName) $([System.DateTime]::Now.ToString(`yyyy`))"</Copyright>
 
-		<TargetFrameworks>net7.0</TargetFrameworks>
+		<TargetFrameworks>net6.0</TargetFrameworks>
 		<PackageId>Andtech.Todo</PackageId>
 		<RootNamespace>$(PackageId)</RootNamespace>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Crayon" Version="2.0.69" />
+	</ItemGroup>
 	
 	<!-- NuGet Packages -->
 </Project>

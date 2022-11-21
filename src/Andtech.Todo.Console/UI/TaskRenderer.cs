@@ -1,5 +1,6 @@
 ﻿using Andtech.Todo;
 using Spectre.Console;
+using static Crayon.Output;
 
 public class TaskRenderer
 {
@@ -18,10 +19,10 @@ public class TaskRenderer
 	public string Render()
 	{
 		var symbol = task.Complete ? "☒" : "☐";
-		var content = task.Title.EscapeMarkup();
+		var content = task.Title;
 		if (task.Complete)
 		{
-			content = $"[dim]{content}[/]";
+			content = Dim(content);
 		}
 		var text = string.Join(" ",
 			symbol,

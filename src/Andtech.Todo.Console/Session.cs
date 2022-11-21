@@ -12,6 +12,9 @@ namespace Andtech.Todo.Console
 		public string ProjectDir { get; set; }
 		public List<TodoList> Lists { get; set; } = new List<TodoList>();
 
+		public LinearWindow Window { get; set; }
+		public RawScreen Screen { get; set; }
+
 		public static Session Instance { get; set; }
 	}
 }

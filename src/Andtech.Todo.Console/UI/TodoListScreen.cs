@@ -93,7 +93,7 @@ public class TodoListScreen
 				var text = tree[index].Render();
 				if (index == CursorLineNumber)
 				{
-					text = $"[blue]{text}[/]";
+					text = $"{text}";
 				}
 				table.AddRow(new Markup(text));
 			}
