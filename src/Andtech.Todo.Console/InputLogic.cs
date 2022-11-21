@@ -13,9 +13,9 @@ public class InputLogic
 
 	public async Task RunAsync(CancellationToken cancellationToken = default)
 	{
-		while (true)
+		while (!cancellationToken.IsCancellationRequested)
 		{
-			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(false, cancellationToken: cancellationToken);
+			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(true, cancellationToken: cancellationToken);
 
 			if (keyInfo.HasValue)
 			{

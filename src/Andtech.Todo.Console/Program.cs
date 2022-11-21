@@ -46,14 +46,9 @@ public partial class Program
 		Init();
 
 		cts = new CancellationTokenSource();
-
 		var token = cts.Token;
+		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
 
-		//await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
-
-		await RunAsync(cancellationToken: token);
-
-		Console.Clear();
 		cts.Cancel();
 		cts.Dispose();
 	}
@@ -81,16 +76,22 @@ public partial class Program
 
 	static async Task RunAsync(CancellationToken cancellationToken)
 	{
+		var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
 		var input = new InputLogic();
 		input.OnQuit += Input_OnQuit;
 		input.OnLineDown += Input_OnLineDown;
 		input.OnLineUp += Input_OnLineUp;
 		input.OnSubmit += Input_OnSubmit;
-		var inputTask = input.RunAsync(cancellationToken: cancellationToken);
 
+		// Main loop
 		Session.Instance.Screen.Rebuild();
 
+		var inputTask = input.RunAsync(cancellationToken: cts.Token);
+
 		await inputTask;
+		
+		cts?.Dispose();
 
 		void Input_OnSubmit()
 		{
