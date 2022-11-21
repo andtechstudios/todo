@@ -24,21 +24,29 @@ public class TodoListScreen
 
 	public async Task DrawGUIAsync(CancellationToken cancellationToken = default)
 	{
+		var taskList = Session.Instance.Lists[0];
+		tree = new List<TaskRenderer>();
+		foreach (var item in taskList.Tasks)
+		{
+			var element = new TaskRenderer(item);
+			tree.Add(element);
+		}
+
 		try
 		{
-			table = GetTodoListTable();
 			layout = GetLayout();
+			table = GetTodoListTable();
+			layout["body"].Update(table);
 
 			AnsiConsole.Write(layout);
 
 			await AnsiConsole.Live(layout)
 				.AutoClear(false)
-				.Cropping(VerticalOverflowCropping.Bottom)
 				.StartAsync(ctx => RefreshAsync(ctx, cancellationToken: cancellationToken));
 		}
 		catch (Exception ex)
 		{
-			Log.Error.WriteLine(ex.Message);
+			Log.Error.WriteLine(ex);
 			AnsiConsole.Console.Input.ReadKey(true);
 		}
 	}
@@ -48,23 +56,20 @@ public class TodoListScreen
 		var layout = new Layout();
 
 		layout.SplitRows(
-			new Layout("ribbon").Size(4),
-			new Layout("body").Ratio(100),
+			new Layout("ribbon").Size(16),
+			new Layout("body"),
 			new Layout("prompt").Size(4)
 		);
-
-		layout["ribbon"].Update(
-			new Panel(
-					new Text("General | Work | School"))
-				//.NoBorder()
-				.Padding(0, 0)
-				.Expand());
-
-		layout["body"].Update(table);
 
 		layout["prompt"].Update(
 			new Panel(
 					new Text("Prompt\nConsole"))
+				//.NoBorder()
+				.Padding(0, 0)
+				.Expand());
+		layout["ribbon"].Update(
+			new Panel(
+					new Text("General | Work | School"))
 				//.NoBorder()
 				.Padding(0, 0)
 				.Expand());
@@ -74,35 +79,10 @@ public class TodoListScreen
 
 	Table GetTodoListTable()
 	{
-		var taskList = Session.Instance.Lists[0];
-		tree = new List<TaskRenderer>();
-		foreach (var item in taskList.Tasks)
-		{
-			var element = new TaskRenderer(item);
-			tree.Add(element);
-		}
-
-		int n = tree.Count;
 		var table = new Table()
 			.NoBorder()
 			.HideHeaders();
-
-		var height = Console.BufferHeight;
 		table.AddColumn("Content");
-		foreach (var i in Enumerable.Range(0, height))
-		{
-			table.AddRow("");
-		}
-		table.Expand();
-
-		return table;
-	}
-
-	void Rebuild()
-	{
-		RebuildCursor();
-
-		layout["prompt"].Update(new Text($"Line: {CursorLineNumber} (Window: {WindowLineNumber}) (Size: {BodyHeight}) {tree.Count}"));
 
 		for (int visibleLineNumber = 0; visibleLineNumber < BodyHeight; visibleLineNumber++)
 		{
@@ -115,13 +95,20 @@ public class TodoListScreen
 				{
 					text = $"[blue]{text}[/]";
 				}
-				table.Rows.Update(visibleLineNumber, 0, new Markup(text));
-			}
-			else
-			{
-				table.Rows.Update(visibleLineNumber, 0, new Text($"{visibleLineNumber + 1} of {BodyHeight} of {Console.LargestWindowHeight}"));
+				table.AddRow(new Markup(text));
 			}
 		}
+
+		table.Expand();
+
+		return table;
+	}
+
+	void Rebuild()
+	{
+		RebuildCursor();
+
+		layout["body"].Update(GetTodoListTable());
 	}
 
 	void RebuildCursor()
@@ -151,9 +138,9 @@ public class TodoListScreen
 	{
 		isDirty = true;
 		AnsiConsole.Cursor.Hide();
-		Rebuild();
+		AnsiConsole.Cursor.SetPosition(0, 0);
 		context.Refresh();
-		AnsiConsole.Cursor.Show();
+		Rebuild();
 	}
 
 	async Task RefreshAsync(LiveDisplayContext context, CancellationToken cancellationToken = default)

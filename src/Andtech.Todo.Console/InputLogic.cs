@@ -15,7 +15,7 @@ public class InputLogic
 	{
 		while (true)
 		{
-			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(true, cancellationToken: cancellationToken);
+			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(false, cancellationToken: cancellationToken);
 
 			if (keyInfo.HasValue)
 			{

@@ -21,7 +21,10 @@ public partial class Program
 		cts = new CancellationTokenSource();
 
 		var token = cts.Token;
+
 		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
+
+		//await RunAsync(cancellationToken: token);
 
 		cts.Cancel();
 		cts.Dispose();
