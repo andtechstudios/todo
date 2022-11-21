@@ -69,6 +69,9 @@ public class RawScreen
 			tree.Add(element);
 		}
 
+		var highlight = Blue("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+		var non = "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
+
 		var message = "";
 		for (int visibleLineNumber = 0; visibleLineNumber < Session.Instance.Window.Height; visibleLineNumber++)
 		{
@@ -76,10 +79,14 @@ public class RawScreen
 
 			if (index < tree.Count)
 			{
-				var text = tree[index].Render();
+				string text;
 				if (index == Session.Instance.Window.CursorLineNumber)
 				{
-					text = Blue(text);
+					text = highlight;
+				}
+				else
+				{
+					text = non;
 				}
 
 				var space = string.Join(string.Empty, Enumerable.Repeat(" ", Console.BufferWidth - text.Length));
@@ -92,6 +99,7 @@ public class RawScreen
 		Console.CursorLeft = 0;
 		Console.CursorTop = 0;
 		Console.Write(message);
+		Console.CursorVisible = false;
 		Console.CursorTop = Console.BufferHeight - 1;
 		Console.CursorLeft = 0;
 		Console.Write($"{Session.Instance.Window.CursorLineNumber} {Session.Instance.Window.WindowLineNumber} ({Session.Instance.Window.Height})");
