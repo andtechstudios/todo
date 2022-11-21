@@ -56,7 +56,7 @@ public class TodoListScreen
 		var layout = new Layout();
 
 		layout.SplitRows(
-			new Layout("ribbon").Size(16),
+			new Layout("ribbon").Size(4),
 			new Layout("body"),
 			new Layout("prompt").Size(4)
 		);
@@ -139,8 +139,8 @@ public class TodoListScreen
 		isDirty = true;
 		AnsiConsole.Cursor.Hide();
 		AnsiConsole.Cursor.SetPosition(0, 0);
-		context.Refresh();
 		Rebuild();
+		context.Refresh();
 	}
 
 	async Task RefreshAsync(LiveDisplayContext context, CancellationToken cancellationToken = default)
