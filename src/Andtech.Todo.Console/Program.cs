@@ -6,6 +6,7 @@ using Spectre.Console.Rendering;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static Crayon.Output;
@@ -54,6 +55,8 @@ public class RawScreen
 		Rebuild();
 	}
 
+	private int lastPosition = -1;
+
 	public void Rebuild()
 	{
 		Session.Instance.Window.Rebuild();
@@ -79,7 +82,10 @@ public class RawScreen
 					text = Blue(text);
 				}
 
+				var space = string.Join(string.Empty, Enumerable.Repeat(" ", Console.BufferWidth - text.Length));
+
 				message += text + Environment.NewLine;
+				//message += text.EscapeMarkup() + "[link=https://google.com]google[/]" + Environment.NewLine;
 			}
 		}
 
@@ -89,6 +95,7 @@ public class RawScreen
 		Console.CursorTop = Console.BufferHeight - 1;
 		Console.CursorLeft = 0;
 		Console.Write($"{Session.Instance.Window.CursorLineNumber} {Session.Instance.Window.WindowLineNumber} ({Session.Instance.Window.Height})");
+		Console.SetCursorPosition(0, Session.Instance.Window.CursorLineNumber - Session.Instance.Window.WindowLineNumber);
 	}
 }
 
@@ -104,9 +111,9 @@ public partial class Program
 
 		var token = cts.Token;
 
-		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
+		//await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
 
-		//await RunAsync(cancellationToken: token);
+		await RunAsync(cancellationToken: token);
 
 		Console.Clear();
 		cts.Cancel();
@@ -122,7 +129,7 @@ public partial class Program
 		var session = Session.Instance;
 		session.Lists.Add(TodoList.Read(session.ProjectDir + "/todo.md"));
 
-		Session.Instance.Window = new LinearWindow(Session.Instance.Lists[0].Tasks.Count, Console.BufferHeight - 1);
+		Session.Instance.Window = new LinearWindow(Session.Instance.Lists[0].Tasks.Count, Console.BufferHeight - 2);
 		Session.Instance.Screen = new RawScreen();
 	}
 
@@ -134,6 +141,8 @@ public partial class Program
 		input.OnLineUp += Input_OnLineUp;
 		input.OnSubmit += Input_OnSubmit;
 		var inputTask = input.RunAsync(cancellationToken: cancellationToken);
+
+		Session.Instance.Screen.Rebuild();
 
 		await inputTask;
 
