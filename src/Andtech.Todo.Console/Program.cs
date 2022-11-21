@@ -4,106 +4,36 @@ using Andtech.Todo.Console;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static Crayon.Output;
 
-public class LinearWindow
+public class TaskPrinter : Printer
 {
-	public int CursorLineNumber { get; set; }
-	public int WindowLineNumber { get; set; }
-	public int Capacity { get; set; }
-	public int Height { get; set; }
-	
-	public LinearWindow(int capacity, int height)
+	public override string Text => text;
+
+	private readonly TodoTask task;
+	private string text;
+
+	public TaskPrinter(TodoTask task)
 	{
-		Capacity = capacity;
-		Height = height;
+		this.task = task;
 	}
 
-	public void Rebuild()
+	public override void Rebuild(int width)
 	{
-		if (CursorLineNumber < 0)
+		var symbol = task.Complete ? "☒" : "☐";
+		var content = task.Title;
+		if (task.Complete)
 		{
-			CursorLineNumber = 0;
+			content = Dim(content);
 		}
-		if (CursorLineNumber > Capacity - 1)
-		{
-			CursorLineNumber = Capacity - 1;
-		}
-
-		if (CursorLineNumber < WindowLineNumber)
-		{
-			WindowLineNumber = CursorLineNumber;
-		}
-
-		if (CursorLineNumber >= WindowLineNumber + Height)
-		{
-			WindowLineNumber = CursorLineNumber - Height + 1;
-		}
-	}
-}
-
-public class RawScreen
-{
-
-	public void MarkDirty()
-	{
-		Rebuild();
-	}
-
-	private int lastPosition = -1;
-
-	public void Rebuild()
-	{
-		Session.Instance.Window.Rebuild();
-
-		var taskList = Session.Instance.Lists[0];
-		var tree = new List<TaskRenderer>();
-		foreach (var item in taskList.Tasks)
-		{
-			var element = new TaskRenderer(item);
-			tree.Add(element);
-		}
-
-		var highlight = Blue("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
-		var non = "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
-
-		var message = "";
-		for (int visibleLineNumber = 0; visibleLineNumber < Session.Instance.Window.Height; visibleLineNumber++)
-		{
-			var index = visibleLineNumber + Session.Instance.Window.WindowLineNumber;
-
-			if (index < tree.Count)
-			{
-				string text;
-				if (index == Session.Instance.Window.CursorLineNumber)
-				{
-					text = highlight;
-				}
-				else
-				{
-					text = non;
-				}
-
-				var space = string.Join(string.Empty, Enumerable.Repeat(" ", Console.BufferWidth - text.Length));
-
-				message += text + Environment.NewLine;
-				//message += text.EscapeMarkup() + "[link=https://google.com]google[/]" + Environment.NewLine;
-			}
-		}
-
-		Console.CursorLeft = 0;
-		Console.CursorTop = 0;
-		Console.Write(message);
-		Console.CursorVisible = false;
-		Console.CursorTop = Console.BufferHeight - 1;
-		Console.CursorLeft = 0;
-		Console.Write($"{Session.Instance.Window.CursorLineNumber} {Session.Instance.Window.WindowLineNumber} ({Session.Instance.Window.Height})");
-		Console.SetCursorPosition(0, Session.Instance.Window.CursorLineNumber - Session.Instance.Window.WindowLineNumber);
+		text = string.Join(" ",
+			symbol,
+			content,
+			task.Description
+			);
 	}
 }
 
@@ -135,9 +65,17 @@ public partial class Program
 			ProjectDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "todo"),
 		};
 		var session = Session.Instance;
-		session.Lists.Add(TodoList.Read(session.ProjectDir + "/todo.md"));
+		session.TodoLists.Add(TodoList.Read(session.ProjectDir + "/todo.md"));
 
-		Session.Instance.Window = new LinearWindow(Session.Instance.Lists[0].Tasks.Count, Console.BufferHeight - 2);
+		Session.Instance.PrintList = new PrintList();
+		foreach (var task in session.TodoLists[0].Tasks)
+		{
+			var printer = new TaskPrinter(task);
+			printer.Rebuild(Console.BufferWidth);
+			Session.Instance.PrintList.Add(printer);
+		}
+
+		Session.Instance.Window = new LinearWindow(Session.Instance.TodoLists[0].Tasks.Count, Console.BufferHeight - 2);
 		Session.Instance.Screen = new RawScreen();
 	}
 
@@ -156,8 +94,11 @@ public partial class Program
 
 		void Input_OnSubmit()
 		{
-			var task = Session.Instance.Lists[0].Tasks[Session.Instance.Window.CursorLineNumber];
+			var task = Session.Instance.TodoLists[0].Tasks[Session.Instance.Window.CursorLineNumber];
 			task.Complete = !task.Complete;
+
+			Session.Instance.PrintList.Printers[Session.Instance.Window.CursorLineNumber].Rebuild(Console.LargestWindowWidth);
+
 			Session.Instance.Screen.MarkDirty();
 		}
 
