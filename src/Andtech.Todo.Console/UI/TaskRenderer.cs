@@ -13,14 +13,14 @@ public class TaskRenderer
 
 	public void Submit()
 	{
-		task.Complete = !task.Complete;
+		task.IsCompleted = !task.IsCompleted;
 	}
 
 	public string Render()
 	{
-		var symbol = task.Complete ? "☒" : "☐";
+		var symbol = task.IsCompleted ? "☒" : "☐";
 		var content = task.Title;
-		if (task.Complete)
+		if (task.IsCompleted)
 		{
 			content = Dim(content);
 		}

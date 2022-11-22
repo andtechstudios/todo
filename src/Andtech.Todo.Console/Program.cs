@@ -23,9 +23,9 @@ public class TaskPrinter : Printer
 
 	public override void Rebuild(int width)
 	{
-		var symbol = task.Complete ? "☒" : "☐";
+		var symbol = task.IsCompleted ? "☒" : "☐";
 		var content = task.Title;
-		if (task.Complete)
+		if (task.IsCompleted)
 		{
 			content = Dim(content);
 		}
@@ -48,9 +48,19 @@ public partial class Program
 		cts = new CancellationTokenSource();
 		var token = cts.Token;
 		await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => RunAsync(cancellationToken: token));
-
 		cts.Cancel();
 		cts.Dispose();
+
+		var markdownWriter = new MarkdownWriter();
+		foreach (var list in Session.Instance.TodoLists)
+		{
+			var fileWriter = new StreamWriter(list.Path);
+			foreach (var task in list.Tasks)
+			{
+				fileWriter.WriteLine(markdownWriter.ToString(task));
+			}
+			fileWriter.Close();
+		}
 	}
 
 	static void Init()
@@ -96,7 +106,7 @@ public partial class Program
 		void Input_OnSubmit()
 		{
 			var task = Session.Instance.TodoLists[0].Tasks[Session.Instance.Window.CursorLineNumber];
-			task.Complete = !task.Complete;
+			task.IsCompleted = !task.IsCompleted;
 
 			Session.Instance.PrintList.Printers[Session.Instance.Window.CursorLineNumber].Rebuild(Console.LargestWindowWidth);
 

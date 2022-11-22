@@ -11,12 +11,14 @@ namespace Andtech.Todo
 	public class TodoList
 	{
 		public List<TodoTask> Tasks { get; private set; }
+		public string Path { get; private set; }
 
 		public static TodoList Read(string path)
 		{
 			var list = new TodoList()
 			{
 				Tasks = new List<TodoTask>(),
+				Path = path,
 			};
 
 			var text = File.ReadAllText(path);
