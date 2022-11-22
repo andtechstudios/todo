@@ -16,8 +16,6 @@ public class RawScreen
 
 	public void Rebuild()
 	{
-		Session.Instance.Window.Rebuild();
-
 		var taskList = Session.Instance.TodoLists[0];
 		var tree = new List<TaskRenderer>();
 		foreach (var item in taskList.Tasks)

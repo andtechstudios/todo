@@ -12,6 +12,7 @@ namespace Andtech.Todo.Console
 		public string ProjectDir { get; set; }
 		public List<TodoList> TodoLists { get; set; } = new List<TodoList>();
 		public PrintList PrintList { get; set; }
+		public bool CanWrite { get; set; }
 
 		public LinearWindow Window { get; set; }
 		public RawScreen Screen { get; set; }

@@ -1,9 +1,19 @@
 ﻿public class LinearWindow
 {
-	public int CursorLineNumber { get; set; }
+	public int CursorLineNumber
+	{
+		get => cursorLineNumber;
+		set
+		{
+			cursorLineNumber = value;
+			Rebuild();
+		}
+	}
 	public int WindowLineNumber { get; set; }
 	public int Capacity { get; set; }
 	public int Height { get; set; }
+
+	private int cursorLineNumber;
 	
 	public LinearWindow(int capacity, int height)
 	{
