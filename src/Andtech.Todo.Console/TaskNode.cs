@@ -1,19 +1,20 @@
 ﻿using Andtech.Todo;
+using System;
 using static Crayon.Output;
 
-public class TaskPrinter : Printer
+public class TaskNode : IEditorNode
 {
-	public override string Text => text;
+	public string Text => text;
 
 	private readonly TodoTask task;
 	private string text;
 
-	public TaskPrinter(TodoTask task)
+	public TaskNode(TodoTask task)
 	{
 		this.task = task;
 	}
 
-	public override void Rebuild(int width)
+	public void Rebuild(int width)
 	{
 		var symbol = task.IsCompleted ? "☒" : "☐";
 		var content = task.Title;
@@ -26,6 +27,12 @@ public class TaskPrinter : Printer
 			content,
 			task.Description
 			);
+	}
+
+	void IEditorNode.Submit()
+	{
+		task.IsCompleted = !task.IsCompleted;
+		Rebuild(Console.LargestWindowWidth);
 	}
 }
 

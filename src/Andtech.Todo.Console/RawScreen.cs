@@ -6,15 +6,23 @@ using static Crayon.Output;
 
 public class RawScreen
 {
+	private readonly LinearWindow window;
+	private readonly List<IEditorNode> nodes;
+
+	public RawScreen(LinearWindow window, List<IEditorNode> nodes)
+	{
+		this.window = window;
+		this.nodes = nodes;
+	}
 
 	public void MarkDirty()
 	{
-		Rebuild();
+		DrawImmediate();
 	}
 
 	private int lastPosition = -1;
 
-	public void Rebuild()
+	public void DrawImmediate()
 	{
 		var taskList = Session.Instance.TodoLists[0];
 		var tree = new List<TaskRenderer>();
@@ -25,23 +33,17 @@ public class RawScreen
 		}
 
 		var message = "";
-		for (int visibleLineNumber = 0; visibleLineNumber < Session.Instance.Window.Height; visibleLineNumber++)
+		for (int visibleLineNumber = 0; visibleLineNumber < window.Height; visibleLineNumber++)
 		{
-			var index = visibleLineNumber + Session.Instance.Window.WindowLineNumber;
+			var index = visibleLineNumber + window.WindowLineNumber;
 
 			if (index < tree.Count)
 			{
-				string text;
-				if (index == Session.Instance.Window.CursorLineNumber)
+				string text = nodes[index].Text;
+				if (index == window.CursorLineNumber)
 				{
-					text = Session.Instance.PrintList.Printers[index].Text;
+					text = Blue(text);
 				}
-				else
-				{
-					text = Blue(Session.Instance.PrintList.Printers[index].Text);
-				}
-
-				//var space = string.Join(string.Empty, Enumerable.Repeat(" ", Console.BufferWidth - text.Length));
 
 				message += text + Environment.NewLine;
 			}
@@ -53,8 +55,8 @@ public class RawScreen
 		Console.CursorVisible = false;
 		Console.CursorTop = Console.BufferHeight - 1;
 		Console.CursorLeft = 0;
-		Console.Write($"{Session.Instance.Window.CursorLineNumber} {Session.Instance.Window.WindowLineNumber} ({Session.Instance.Window.Height})");
-		Console.SetCursorPosition(0, Session.Instance.Window.CursorLineNumber - Session.Instance.Window.WindowLineNumber);
+		Console.Write($"Ln {window.CursorLineNumber + 1}");
+		Console.SetCursorPosition(0, window.CursorLineNumber - window.WindowLineNumber);
 	}
 }
 

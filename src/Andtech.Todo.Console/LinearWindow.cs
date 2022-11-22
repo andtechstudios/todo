@@ -1,36 +1,51 @@
-﻿public class LinearWindow
+﻿using System;
+
+public class LinearWindow
 {
 	public int CursorLineNumber
 	{
 		get => cursorLineNumber;
 		set
 		{
-			cursorLineNumber = value;
-			Rebuild();
+			var oldValue = CursorLineNumber;
+			var newValue = Clamp(value);
+
+			if (oldValue != newValue)
+			{
+				cursorLineNumber = newValue;
+				Rebuild();
+			}
 		}
 	}
 	public int WindowLineNumber { get; set; }
-	public int Capacity { get; set; }
+	public Func<int> GetCapacity { get; set; }
 	public int Height { get; set; }
 
 	private int cursorLineNumber;
 	
-	public LinearWindow(int capacity, int height)
+	public LinearWindow(Func<int> getCapacity, int height)
 	{
-		Capacity = capacity;
+		GetCapacity = getCapacity;
 		Height = height;
 	}
 
-	public void Rebuild()
+	public int Clamp(int lineNumber)
 	{
-		if (CursorLineNumber < 0)
+		if (lineNumber < 0)
 		{
-			CursorLineNumber = 0;
+			lineNumber = 0;
 		}
-		if (CursorLineNumber > Capacity - 1)
+		if (lineNumber > GetCapacity() - 1)
 		{
-			CursorLineNumber = Capacity - 1;
+			lineNumber = GetCapacity() - 1;
 		}
+
+		return lineNumber;
+	}
+
+	void Rebuild()
+	{
+		CursorLineNumber = Clamp(CursorLineNumber);
 
 		if (CursorLineNumber < WindowLineNumber)
 		{
