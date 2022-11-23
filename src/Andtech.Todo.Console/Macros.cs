@@ -17,7 +17,23 @@ namespace Andtech.Todo.Console
 			list[a] = temp;
 		}
 
-		public static bool TryFindPreviousSibling(int lineNumber, IList<TodoTask> heirarchy, out int siblingLineNumber)
+		public static IEnumerable<int> GetChildren(IList<TodoTask> heirarchy, int lineNumber)
+		{
+			var otherLineNumber = lineNumber;
+			while (++otherLineNumber < heirarchy.Count)
+			{
+				if (heirarchy[otherLineNumber].Level > heirarchy[lineNumber].Level)
+				{
+					yield return otherLineNumber;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+
+		public static bool TryFindPreviousSibling(IList<TodoTask> heirarchy, int lineNumber, out int siblingLineNumber)
 		{
 			siblingLineNumber = lineNumber;
 			while (--siblingLineNumber >= 0)
@@ -36,7 +52,7 @@ namespace Andtech.Todo.Console
 			return false;
 		}
 
-		public static bool TryFindNextSibling(int lineNumber, IList<TodoTask> heirarchy, out int siblingLineNumber)
+		public static bool TryFindNextSibling(IList<TodoTask> heirarchy, int lineNumber, out int siblingLineNumber)
 		{
 			siblingLineNumber = lineNumber;
 			while (++siblingLineNumber < heirarchy.Count)

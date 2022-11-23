@@ -67,7 +67,7 @@ public class Editor
 
 	public void MoveUp()
 	{
-		if (Macros.TryFindPreviousSibling(Window.CursorLineNumber, tasks, out var nextLine))
+		if (Macros.TryFindPreviousSibling(tasks, Window.CursorLineNumber, out var nextLine))
 		{
 			Swap(Window.CursorLineNumber, nextLine);
 		}
@@ -75,7 +75,8 @@ public class Editor
 
 	public void MoveDown()
 	{
-		if (Macros.TryFindNextSibling(Window.CursorLineNumber, tasks, out var nextLine))
+		
+		if (Macros.TryFindNextSibling(tasks, Window.CursorLineNumber, out var nextLine))
 		{
 			Swap(Window.CursorLineNumber, nextLine);
 		}
@@ -102,22 +103,24 @@ public class Editor
 			return;
 		}
 
-		for (int i = Window.CursorLineNumber; i < nodes.Count; i++)
+		foreach (int childLineNumber in Macros.GetChildren(tasks, Window.CursorLineNumber))
 		{
-			var task = tasks[i];
-			if (i != Window.CursorLineNumber && task.Level <= initialLevel)
-			{
-				break;
-			}
-
 			if (isIncrease)
 			{
-				(nodes[i] as IIndentable)?.IncreaseLevel();
+				(nodes[childLineNumber] as IIndentable)?.IncreaseLevel();
 			}
 			else
 			{
-				(nodes[i] as IIndentable)?.DecreaseLevel();
+				(nodes[childLineNumber] as IIndentable)?.DecreaseLevel();
 			}
+		}
+		if (isIncrease)
+		{
+			(nodes[Window.CursorLineNumber] as IIndentable)?.IncreaseLevel();
+		}
+		else
+		{
+			(nodes[Window.CursorLineNumber] as IIndentable)?.DecreaseLevel();
 		}
 		Screen.MarkDirty();
 	}
