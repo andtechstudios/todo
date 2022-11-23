@@ -58,21 +58,39 @@ public class Editor
 		return false;
 	}
 
+	#region operations
 	public void Submit()
 	{
 		nodes[Window.CursorLineNumber].Submit();
 		Screen.MarkDirty();
 	}
 
+	public void MoveUp()
+	{
+		if (Macros.TryFindPreviousSibling(Window.CursorLineNumber, tasks, out var nextLine))
+		{
+			Swap(Window.CursorLineNumber, nextLine);
+		}
+	}
+
+	public void MoveDown()
+	{
+		if (Macros.TryFindNextSibling(Window.CursorLineNumber, tasks, out var nextLine))
+		{
+			Swap(Window.CursorLineNumber, nextLine);
+		}
+	}
+
 	public void IncreaseLevel() => SetLevel(isIncrease: true);
 
 	public void DecreaseLevel() => SetLevel(isIncrease: false);
+	#endregion
 
 	void SetLevel(bool isIncrease)
 	{
 		var offset = isIncrease ? 1 : -1;
 		var initialLevel = tasks[Window.CursorLineNumber].Level;
-		var parentLevel = Window.IsInBounds(Window.CursorLineNumber - 1) ? tasks[Window.CursorLineNumber - 1].Level : 0;
+		var parentLevel = Window.IsInBounds(Window.CursorLineNumber - 1) ? tasks[Window.CursorLineNumber - 1].Level : -1;
 		if (parentLevel > initialLevel)
 		{
 			parentLevel = initialLevel;

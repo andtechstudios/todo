@@ -22,8 +22,8 @@ public class EditorSubroutine
 		input.Actions.Add(new Command(ConsoleKey.DownArrow), Input_OnLineDown);
 		input.Actions.Add(new Command(ConsoleKey.UpArrow), Input_OnLineUp);
 		input.Actions.Add(new Command(ConsoleKey.S, ConsoleModifiers.Control), EnableSave);
-		input.Actions.Add(new Command(ConsoleKey.DownArrow, ConsoleModifiers.Alt), MoveLineDown);
-		input.Actions.Add(new Command(ConsoleKey.UpArrow, ConsoleModifiers.Alt), MoveLineUp);
+		input.Actions.Add(new Command(ConsoleKey.DownArrow, ConsoleModifiers.Alt), editor.MoveDown);
+		input.Actions.Add(new Command(ConsoleKey.UpArrow, ConsoleModifiers.Alt), editor.MoveUp);
 		input.Actions.Add(new Command(ConsoleKey.Tab), editor.IncreaseLevel);
 		input.Actions.Add(new Command(ConsoleKey.Tab, ConsoleModifiers.Shift), editor.DecreaseLevel);
 
@@ -35,10 +35,6 @@ public class EditorSubroutine
 		cts?.Dispose();
 
 		// Local functions
-		void MoveLineUp() => editor.Swap(editor.Window.CursorLineNumber, editor.Window.CursorLineNumber - 1);
-
-		void MoveLineDown() => editor.Swap(editor.Window.CursorLineNumber, editor.Window.CursorLineNumber + 1);
-
 		void EnableSave()
 		{
 			Session.Instance.CanWrite = true;

@@ -16,5 +16,43 @@ namespace Andtech.Todo.Console
 			list[b] = list[a];
 			list[a] = temp;
 		}
+
+		public static bool TryFindPreviousSibling(int lineNumber, IList<TodoTask> heirarchy, out int siblingLineNumber)
+		{
+			siblingLineNumber = lineNumber;
+			while (--siblingLineNumber >= 0)
+			{
+				if (heirarchy[siblingLineNumber].Level == heirarchy[lineNumber].Level)
+				{
+					return true;
+				}
+
+				if (heirarchy[siblingLineNumber].Level < heirarchy[lineNumber].Level)
+				{
+					break;
+				}
+			}
+
+			return false;
+		}
+
+		public static bool TryFindNextSibling(int lineNumber, IList<TodoTask> heirarchy, out int siblingLineNumber)
+		{
+			siblingLineNumber = lineNumber;
+			while (++siblingLineNumber < heirarchy.Count)
+			{
+				if (heirarchy[siblingLineNumber].Level == heirarchy[lineNumber].Level)
+				{
+					return true;
+				}
+
+				if (heirarchy[siblingLineNumber].Level < heirarchy[lineNumber].Level)
+				{
+					break;
+				}
+			}
+
+			return false;
+		}
 	}
 }
