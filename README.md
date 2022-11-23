@@ -25,3 +25,5 @@
 | Escape | Cancel Edit |
 | Tab | Increase Indent |
 | Shift + Tab | Decrease Indent |
+
+* Can only indent 1 past parent

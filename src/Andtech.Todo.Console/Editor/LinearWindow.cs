@@ -29,6 +29,20 @@ public class LinearWindow
 		Height = height;
 	}
 
+	public bool IsInBounds(int lineNumber)
+	{
+		if (lineNumber < 0)
+		{
+			return false;
+		}
+		if (lineNumber > GetCapacity() - 1)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 	public int Clamp(int lineNumber)
 	{
 		if (lineNumber < 0)

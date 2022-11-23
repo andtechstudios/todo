@@ -14,6 +14,7 @@ public class Editor
 	public RawScreen Screen { get; set; }
 
 	public readonly List<IEditorNode> nodes = new List<IEditorNode>();
+	private readonly List<TodoTask> tasks;
 
 	public Editor(TodoList list)
 	{
@@ -23,6 +24,7 @@ public class Editor
 			node.Rebuild(Console.LargestWindowWidth);
 			nodes.Add(node);
 		}
+		tasks = list.Tasks;
 
 		Window = new LinearWindow(() => nodes.Count, Console.BufferHeight - 2);
 		Screen = new RawScreen(Window, nodes);
@@ -65,15 +67,43 @@ public class Editor
 		Screen.MarkDirty();
 	}
 
-	public void IncreaseLevel()
-	{
-		(nodes[Window.CursorLineNumber] as IIndentable)?.IncreaseLevel();
-		Screen.MarkDirty();
-	}
+	public void IncreaseLevel() => SetLevel(isIncrease: true);
 
-	public void DecreaseLevel()
+	public void DecreaseLevel() => SetLevel(isIncrease: false);
+
+	void SetLevel(bool isIncrease)
 	{
-		(nodes[Window.CursorLineNumber] as IIndentable)?.DecreaseLevel();
+		var offset = isIncrease ? 1 : -1;
+		var initialLevel = tasks[Window.CursorLineNumber].Level;
+		var parentLevel = Window.IsInBounds(Window.CursorLineNumber - 1) ? tasks[Window.CursorLineNumber - 1].Level : 0;
+		if (parentLevel > initialLevel)
+		{
+			parentLevel = initialLevel;
+		}
+		var desiredLevel = initialLevel + offset;
+
+		if (Math.Abs(desiredLevel - parentLevel) > 1)
+		{
+			return;
+		}
+
+		for (int i = Window.CursorLineNumber; i < nodes.Count; i++)
+		{
+			var task = tasks[i];
+			if (i != Window.CursorLineNumber && task.Level <= initialLevel)
+			{
+				break;
+			}
+
+			if (isIncrease)
+			{
+				(nodes[i] as IIndentable)?.IncreaseLevel();
+			}
+			else
+			{
+				(nodes[i] as IIndentable)?.DecreaseLevel();
+			}
+		}
 		Screen.MarkDirty();
 	}
 }

@@ -49,6 +49,7 @@ public class TaskNode : IEditorNode, IIndentable
 	void IIndentable.DecreaseLevel()
 	{
 		task.Level--;
+		task.Level = Math.Max(0, task.Level);
 		Rebuild(Console.LargestWindowWidth);
 	}
 }
