@@ -66,24 +66,31 @@ public class Editor
 		var midLnBegin = rangeLnBegin + lengthA;
 		var midLnEnd = midLnBegin + midLength;
 
-		var tempNodes = new LinkedList<IEditorNode>();
-		var tempTasks = new LinkedList<TodoTask>();
+		// Gather indices
+		var map = new List<int>();
 		for (int i = b; i < b + lengthB; i++)
 		{
-			tempNodes.AddLast(nodes[i]);
-			tempTasks.AddLast(tasks[i]);
+			map.Add(i - rangeLnBegin);
 		}
 		for (int i = midLnBegin; i < midLnEnd; i++)
 		{
-			tempNodes.AddLast(nodes[i]);
-			tempTasks.AddLast(tasks[i]);
+			map.Add(i - rangeLnBegin);
 		}
 		for (int i = a; i < a + lengthA; i++)
 		{
-			tempNodes.AddLast(nodes[i]);
-			tempTasks.AddLast(tasks[i]);
+			map.Add(i - rangeLnBegin);
 		}
 
+		// Buffer nodes
+		var tempNodes = new LinkedList<IEditorNode>();
+		var tempTasks = new LinkedList<TodoTask>();
+		foreach (var ln in map)
+		{
+			tempNodes.AddLast(nodes[ln + rangeLnBegin]);
+			tempTasks.AddLast(tasks[ln + rangeLnBegin]);
+		}
+
+		// Swap
 		int index;
 		index = 0;
 		foreach (var node in tempNodes)
@@ -102,6 +109,7 @@ public class Editor
 			index++;
 		}
 
+		// Update cursor
 		if (inverted)
 		{
 			Window.CursorLineNumber = a;

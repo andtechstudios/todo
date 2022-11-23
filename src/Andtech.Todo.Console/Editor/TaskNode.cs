@@ -33,8 +33,7 @@ public class TaskNode : IEditorNode, IIndentable
 			task.Description
 			);
 
-		text += task.Level;
-		text += "           ";
+		text += string.Join(string.Empty, Enumerable.Repeat(" ", width - text.Length));
 	}
 
 	void IEditorNode.Submit()
