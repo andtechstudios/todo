@@ -17,6 +17,16 @@ namespace Andtech.Todo.Console
 			list[a] = temp;
 		}
 
+		public static IEnumerable<int> Subtree(IList<TodoTask> heirarchy, int lineNumber)
+		{
+			yield return lineNumber;
+
+			foreach (var child in GetChildren(heirarchy, lineNumber))
+			{
+				yield return child;
+			}
+		}
+
 		public static IEnumerable<int> GetChildren(IList<TodoTask> heirarchy, int lineNumber)
 		{
 			var otherLineNumber = lineNumber;
@@ -31,6 +41,27 @@ namespace Andtech.Todo.Console
 					break;
 				}
 			}
+		}
+
+		public static int Depth(IList<TodoTask> heirarchy, int lineNumber) => 1 + ChildCount(heirarchy, lineNumber);
+
+		public static int ChildCount(IList<TodoTask> heirarchy, int lineNumber)
+		{
+			var count = 0;
+			var otherLineNumber = lineNumber;
+			while (++otherLineNumber < heirarchy.Count)
+			{
+				if (heirarchy[otherLineNumber].Level > heirarchy[lineNumber].Level)
+				{
+					count++;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			return count;
 		}
 
 		public static bool TryFindPreviousSibling(IList<TodoTask> heirarchy, int lineNumber, out int siblingLineNumber)

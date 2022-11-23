@@ -32,6 +32,9 @@ public class TaskNode : IEditorNode, IIndentable
 			content,
 			task.Description
 			);
+
+		text += task.Level;
+		text += "           ";
 	}
 
 	void IEditorNode.Submit()

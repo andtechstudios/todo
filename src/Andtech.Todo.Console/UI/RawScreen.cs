@@ -55,7 +55,7 @@ public class RawScreen
 		Console.CursorVisible = false;
 		Console.CursorTop = Console.BufferHeight - 1;
 		Console.CursorLeft = 0;
-		Console.Write($"Ln {window.CursorLineNumber + 1}");
+		Console.Write($"Ln {window.CursorLineNumber + 1} | {Session.Instance.Log}");
 		Console.SetCursorPosition(0, window.CursorLineNumber - window.WindowLineNumber);
 	}
 }

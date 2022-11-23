@@ -42,20 +42,77 @@ public class Editor
 		return false;
 	}
 
-	public bool Swap(int a, int b)
+	public bool Swap(int a, int b, bool inverted = false)
 	{
-		var previousLineNumber = Window.Clamp(a);
-		var nextLineNumber = Window.Clamp(b);
-
-		if (previousLineNumber != nextLineNumber)
+		// Make sure 'a' is before 'b'
+		if (b < a)
 		{
-			Window.CursorLineNumber = nextLineNumber;
-			nodes.Swap(previousLineNumber, nextLineNumber);
-			Screen.MarkDirty();
-			return true;
+			return Swap(b, a, inverted: true);
 		}
 
-		return false;
+		a = Window.Clamp(a);
+		b = Window.Clamp(b);
+		if (a == b)
+		{
+			return false;
+		}
+
+		var lengthA = Macros.Depth(tasks, a);
+		var lengthB = Macros.Depth(tasks, b);
+		var rangeLnBegin = Math.Min(a, b);
+		var rangeLnEnd = Math.Max(a + lengthA, b + lengthB);
+		var rangeLength = rangeLnEnd - rangeLnBegin;
+		var midLength = rangeLength - lengthA - lengthB;
+		var midLnBegin = rangeLnBegin + lengthA;
+		var midLnEnd = midLnBegin + midLength;
+
+		var tempNodes = new LinkedList<IEditorNode>();
+		var tempTasks = new LinkedList<TodoTask>();
+		for (int i = b; i < b + lengthB; i++)
+		{
+			tempNodes.AddLast(nodes[i]);
+			tempTasks.AddLast(tasks[i]);
+		}
+		for (int i = midLnBegin; i < midLnEnd; i++)
+		{
+			tempNodes.AddLast(nodes[i]);
+			tempTasks.AddLast(tasks[i]);
+		}
+		for (int i = a; i < a + lengthA; i++)
+		{
+			tempNodes.AddLast(nodes[i]);
+			tempTasks.AddLast(tasks[i]);
+		}
+
+		int index;
+		index = 0;
+		foreach (var node in tempNodes)
+		{
+			var ln = rangeLnBegin + index;
+			nodes[ln] = node;
+
+			index++;
+		}
+		index = 0;
+		foreach (var task in tempTasks)
+		{
+			var ln = rangeLnBegin + index;
+			tasks[ln] = task;
+
+			index++;
+		}
+
+		if (inverted)
+		{
+			Window.CursorLineNumber = a;
+		}
+		else
+		{
+			Window.CursorLineNumber = a + lengthB + midLength;
+		}
+
+		Screen.MarkDirty();
+		return true;
 	}
 
 	#region operations
@@ -67,18 +124,20 @@ public class Editor
 
 	public void MoveUp()
 	{
-		if (Macros.TryFindPreviousSibling(tasks, Window.CursorLineNumber, out var nextLine))
+		var ln = Window.CursorLineNumber;
+		if (Macros.TryFindPreviousSibling(tasks, ln, out var otherLn))
 		{
-			Swap(Window.CursorLineNumber, nextLine);
+			Session.Instance.Log = otherLn.ToString();
+			Swap(ln, otherLn);
 		}
 	}
 
 	public void MoveDown()
 	{
-		
-		if (Macros.TryFindNextSibling(tasks, Window.CursorLineNumber, out var nextLine))
+		var ln = Window.CursorLineNumber;
+		if (Macros.TryFindNextSibling(tasks, ln, out var otherLn))
 		{
-			Swap(Window.CursorLineNumber, nextLine);
+			Swap(ln, otherLn);
 		}
 	}
 
@@ -89,9 +148,10 @@ public class Editor
 
 	void SetLevel(bool isIncrease)
 	{
+		var ln = Window.CursorLineNumber;
 		var offset = isIncrease ? 1 : -1;
-		var initialLevel = tasks[Window.CursorLineNumber].Level;
-		var parentLevel = Window.IsInBounds(Window.CursorLineNumber - 1) ? tasks[Window.CursorLineNumber - 1].Level : -1;
+		var initialLevel = tasks[ln].Level;
+		var parentLevel = Window.IsInBounds(ln - 1) ? tasks[ln - 1].Level : -1;
 		if (parentLevel > initialLevel)
 		{
 			parentLevel = initialLevel;
@@ -103,24 +163,24 @@ public class Editor
 			return;
 		}
 
-		foreach (int childLineNumber in Macros.GetChildren(tasks, Window.CursorLineNumber))
+		foreach (int childLn in Macros.GetChildren(tasks, ln))
 		{
 			if (isIncrease)
 			{
-				(nodes[childLineNumber] as IIndentable)?.IncreaseLevel();
+				(nodes[childLn] as IIndentable)?.IncreaseLevel();
 			}
 			else
 			{
-				(nodes[childLineNumber] as IIndentable)?.DecreaseLevel();
+				(nodes[childLn] as IIndentable)?.DecreaseLevel();
 			}
 		}
 		if (isIncrease)
 		{
-			(nodes[Window.CursorLineNumber] as IIndentable)?.IncreaseLevel();
+			(nodes[ln] as IIndentable)?.IncreaseLevel();
 		}
 		else
 		{
-			(nodes[Window.CursorLineNumber] as IIndentable)?.DecreaseLevel();
+			(nodes[ln] as IIndentable)?.DecreaseLevel();
 		}
 		Screen.MarkDirty();
 	}

@@ -12,6 +12,7 @@ namespace Andtech.Todo.Console
 		public string ProjectDir { get; set; }
 		public List<TodoList> TodoLists { get; set; } = new List<TodoList>();
 		public bool CanWrite { get; set; }
+		public string Log { get; set; }
 
 		public static Session Instance { get; set; }
 	}
