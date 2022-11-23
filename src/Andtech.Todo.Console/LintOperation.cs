@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using Andtech.Common;
+using CommandLine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,12 @@ namespace Andtech.Todo.Console
 
 		public static async Task OnParseAsync(Options options)
 		{
-
+			var list = Session.Instance.TodoLists[0];
+			foreach (var task in list.Tasks)
+			{
+				var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level));
+				Log.WriteLine(indentation + task.Title);
+			}
 		}
 	}
 }

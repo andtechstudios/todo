@@ -34,6 +34,7 @@
 	</Choose>
 	<ItemGroup>
 	  <PackageReference Include="Andtech.Common" Version="0.18.1" />
+	  <PackageReference Include="CommandLineParser" Version="2.9.1" />
 	  <PackageReference Include="Spectre.Console" Version="0.45.1-preview.0.41" />
 	</ItemGroup>
 	<ItemGroup>

@@ -9,8 +9,9 @@ namespace Andtech.Todo
 		public string Title { get; set; }
 		public string Description { get; set; }
 		public List<string> Tags { get; set; }
+		public int Level { get; set; }
 
-		private static readonly Regex TaskRegex = new Regex(@"^(\*|-)\s*(\[(?<complete> |x)\]\s*)?(?<title>.*)");
+		private static readonly Regex TaskRegex = new Regex(@"^\s*(\*|-)\s*(\[(?<complete> |x)\]\s*)?(?<title>.*)\s*$");
 
 		public static TodoTask Parse(string text)
 		{
