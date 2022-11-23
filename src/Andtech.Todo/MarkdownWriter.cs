@@ -13,7 +13,9 @@ namespace Andtech.Todo
 		public string ToString(TodoTask task)
 		{
 			var builder = new StringBuilder();
+			var indentation = string.Join(string.Empty, Enumerable.Repeat('\t', task.Level));
 
+			builder.Append(indentation);
 			builder.Append("*");
 			builder.Append(task.IsCompleted ? " [x]" : " [ ]");
 			builder.Append($" {task.Title}");

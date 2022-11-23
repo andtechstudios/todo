@@ -35,9 +35,12 @@ namespace Andtech.Todo
 				{
 					parents.Push(leadingWhitespace);
 				}
-				else if (leadingWhitespace.Length < parents.Peek().Length)
+				else
 				{
-					parents.Pop();
+					while (leadingWhitespace.Length < parents.Peek().Length)
+					{
+						parents.Pop();
+					}
 
 					if (leadingWhitespace.Length > parents.Peek().Length)
 					{
