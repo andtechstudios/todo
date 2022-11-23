@@ -15,7 +15,6 @@ public class InputLogic
 		{
 			var keyInfo = await AnsiConsole.Console.Input.ReadKeyAsync(true, cancellationToken: cancellationToken);
 
-
 			if (keyInfo.HasValue)
 			{
 				var command = new Command(keyInfo.Value.Key, keyInfo.Value.Modifiers);

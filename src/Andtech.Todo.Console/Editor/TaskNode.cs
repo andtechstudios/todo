@@ -1,8 +1,10 @@
 ﻿using Andtech.Todo;
+using Andtech.Todo.Console.Editor;
 using System;
+using System.Linq;
 using static Crayon.Output;
 
-public class TaskNode : IEditorNode
+public class TaskNode : IEditorNode, IIndentable
 {
 	public string Text => text;
 
@@ -22,7 +24,10 @@ public class TaskNode : IEditorNode
 		{
 			content = Dim(content);
 		}
+		var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level));
+
 		text = string.Join(" ",
+			indentation,
 			symbol,
 			content,
 			task.Description
@@ -32,6 +37,18 @@ public class TaskNode : IEditorNode
 	void IEditorNode.Submit()
 	{
 		task.IsCompleted = !task.IsCompleted;
+		Rebuild(Console.LargestWindowWidth);
+	}
+
+	void IIndentable.IncreaseLevel()
+	{
+		task.Level++;
+		Rebuild(Console.LargestWindowWidth);
+	}
+
+	void IIndentable.DecreaseLevel()
+	{
+		task.Level--;
 		Rebuild(Console.LargestWindowWidth);
 	}
 }

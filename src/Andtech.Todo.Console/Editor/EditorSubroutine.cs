@@ -1,5 +1,6 @@
 ﻿using Andtech.Todo;
 using Andtech.Todo.Console;
+using Andtech.Todo.Console.Editor;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -63,6 +64,18 @@ public class Editor
 		nodes[Window.CursorLineNumber].Submit();
 		Screen.MarkDirty();
 	}
+
+	public void IncreaseLevel()
+	{
+		(nodes[Window.CursorLineNumber] as IIndentable)?.IncreaseLevel();
+		Screen.MarkDirty();
+	}
+
+	public void DecreaseLevel()
+	{
+		(nodes[Window.CursorLineNumber] as IIndentable)?.DecreaseLevel();
+		Screen.MarkDirty();
+	}
 }
 
 public interface IEditorNode
@@ -93,6 +106,8 @@ public class EditorSubroutine
 		input.Actions.Add(new Command(ConsoleKey.S, ConsoleModifiers.Control), EnableSave);
 		input.Actions.Add(new Command(ConsoleKey.DownArrow, ConsoleModifiers.Alt), MoveLineDown);
 		input.Actions.Add(new Command(ConsoleKey.UpArrow, ConsoleModifiers.Alt), MoveLineUp);
+		input.Actions.Add(new Command(ConsoleKey.Tab), editor.IncreaseLevel);
+		input.Actions.Add(new Command(ConsoleKey.Tab, ConsoleModifiers.Shift), editor.DecreaseLevel);
 
 		editor.Screen.DrawImmediate();
 
@@ -101,15 +116,10 @@ public class EditorSubroutine
 
 		cts?.Dispose();
 
-		void MoveLineUp()
-		{
-			editor.Swap(editor.Window.CursorLineNumber, editor.Window.CursorLineNumber - 1);
-		}
+		// Local functions
+		void MoveLineUp() => editor.Swap(editor.Window.CursorLineNumber, editor.Window.CursorLineNumber - 1);
 
-		void MoveLineDown()
-		{
-			editor.Swap(editor.Window.CursorLineNumber, editor.Window.CursorLineNumber + 1);
-		}
+		void MoveLineDown() => editor.Swap(editor.Window.CursorLineNumber, editor.Window.CursorLineNumber + 1);
 
 		void EnableSave()
 		{
