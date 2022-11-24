@@ -31,24 +31,8 @@ public partial class Program
 
 		Session.Instance = new Session()
 		{
-			ProjectDir = path,
+			ProjectPath = path,
 		};
-		var session = Session.Instance;
-
-		IEnumerable<string> todoFilePaths;
-		if (File.Exists(path))
-		{
-			todoFilePaths = Enumerable.Repeat(path, 1);
-		}
-		else
-		{
-			todoFilePaths = Directory.EnumerateFiles(path, "*.md");
-		}
-
-		foreach (var todoFilePath in todoFilePaths)
-		{
-			session.TodoLists.Add(TodoList.Read(todoFilePath));
-		}
 	}
 }
 

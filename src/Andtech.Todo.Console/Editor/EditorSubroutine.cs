@@ -1,4 +1,5 @@
-﻿using Andtech.Todo.Console;
+﻿using Andtech.Todo;
+using Andtech.Todo.Console;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,9 +8,9 @@ public class EditorSubroutine
 {
 	private readonly Editor editor;
 
-	public EditorSubroutine()
+	public EditorSubroutine(TodoList todoList)
 	{
-		editor = new Editor(Session.Instance.TodoLists[0]);
+		editor = new Editor(todoList);
 	}
 
 	public async Task RunAsync(CancellationToken cancellationToken)

@@ -24,7 +24,7 @@ public class TodoListScreen
 
 	public async Task DrawGUIAsync(CancellationToken cancellationToken = default)
 	{
-		var taskList = Session.Instance.TodoLists[0];
+		var taskList = Session.Instance.TodoList;
 		tree = new List<TaskRenderer>();
 		foreach (var item in taskList.Tasks)
 		{

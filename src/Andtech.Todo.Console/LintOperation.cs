@@ -20,7 +20,7 @@ namespace Andtech.Todo.Console
 
 		public static async Task OnParseAsync(Options options)
 		{
-			var list = Session.Instance.TodoLists[0];
+			var list = TodoList.Read(Session.Instance.ProjectPath);
 			foreach (var task in list.Tasks)
 			{
 				var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level));

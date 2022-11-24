@@ -20,11 +20,9 @@ public class RawScreen
 		DrawImmediate();
 	}
 
-	private int lastPosition = -1;
-
 	public void DrawImmediate()
 	{
-		var taskList = Session.Instance.TodoLists[0];
+		var taskList = Session.Instance.TodoList;
 		var tree = new List<TaskRenderer>();
 		foreach (var item in taskList.Tasks)
 		{

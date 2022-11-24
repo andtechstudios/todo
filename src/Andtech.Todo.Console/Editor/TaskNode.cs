@@ -20,10 +20,6 @@ public class TaskNode : IEditorNode, IIndentable
 	{
 		var symbol = task.IsCompleted ? "☒" : "☐";
 		var content = task.Title;
-		if (task.IsCompleted)
-		{
-			content = Dim(content);
-		}
 		var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level));
 
 		text = string.Join(" ",

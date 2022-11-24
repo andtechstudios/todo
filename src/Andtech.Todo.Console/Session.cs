@@ -9,8 +9,8 @@ namespace Andtech.Todo.Console
 
 	internal class Session
 	{
-		public string ProjectDir { get; set; }
-		public List<TodoList> TodoLists { get; set; } = new List<TodoList>();
+		public string ProjectPath { get; set; }
+		public TodoList TodoList { get; set; }
 		public bool CanWrite { get; set; }
 		public string Log { get; set; }
 

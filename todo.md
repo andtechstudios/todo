@@ -1,5 +1,5 @@
 * [ ] Implement "create new task"
-* [ ] Support multiple projects/tabs
 * [ ] Implement "delete task"
 * [ ] Implement multi-selection
+* [x] Support multiple projects/tabs (preliminary)
 * [x] Ad-hoc mode
