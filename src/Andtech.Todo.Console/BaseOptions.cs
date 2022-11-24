@@ -9,5 +9,8 @@ public class BaseOptions
 	public bool Verbose { get; set; }
 	[Option('n', "dry-run", HelpText = "Dry run the command.")]
 	public bool DryRun { get; set; }
+
+	[Value(0, MetaName = "Path")]
+	public string Path { get; set; }
 }
 
