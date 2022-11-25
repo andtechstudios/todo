@@ -18,7 +18,7 @@ public class TaskNode : IEditorNode, IIndentable
 
 	public void Rebuild(int width)
 	{
-		var symbol = task.IsCompleted ? "☒" : "☐";
+		var symbol = task.IsCompleted ? "⦿" : "◯";
 		var content = task.Title;
 		var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level));
 
