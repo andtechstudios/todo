@@ -27,6 +27,14 @@ public class Editor
 		Screen = new RawScreen(Window, nodes);
 	}
 
+	public void Add(TodoTask task)
+	{
+		tasks.Add(task);
+		var node = new TaskNode(task);
+		node.Rebuild(Console.LargestWindowWidth);
+		nodes.Add(node);
+	}
+
 	public bool SetCursor(int lineNumber)
 	{
 		var previousLineNumber = Window.CursorLineNumber;

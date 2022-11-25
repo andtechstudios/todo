@@ -1,5 +1,6 @@
 ﻿using Andtech.Todo;
 using Andtech.Todo.Console;
+using Spectre.Console;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ public class EditorSubroutine
 		input.Actions.Add(new Command(ConsoleKey.UpArrow, ConsoleModifiers.Alt), editor.MoveUp);
 		input.Actions.Add(new Command(ConsoleKey.Tab), editor.IncreaseLevel);
 		input.Actions.Add(new Command(ConsoleKey.Tab, ConsoleModifiers.Shift), editor.DecreaseLevel);
+		input.Actions.Add(new Command(ConsoleKey.N, ConsoleModifiers.Control), Create);
 
 		editor.Screen.DrawImmediate();
 
@@ -59,6 +61,27 @@ public class EditorSubroutine
 		void Input_OnQuit()
 		{
 			cts?.Cancel();
+		}
+	}
+
+	void Create()
+	{
+		AnsiConsole.Clear();
+		CreateScreen();
+	}
+
+	void CreateScreen()
+	{
+		try
+		{
+			var input = AnsiConsole.Ask<string>("Task content (markdown):");
+			var task = TodoTask.Parse("* " + input);
+			editor.Add(task);
+			editor.Screen.MarkDirty();
+		}
+		catch
+		{
+
 		}
 	}
 }

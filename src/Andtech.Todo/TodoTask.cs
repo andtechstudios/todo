@@ -16,10 +16,11 @@ namespace Andtech.Todo
 		public static TodoTask Parse(string text)
 		{
 			var regex = TaskRegex.Match(text);
+			var completionCode = regex.Groups["complete"].Value;
 
 			return new TodoTask()
 			{
-				IsCompleted = regex.Groups["complete"].Value != " ",
+				IsCompleted = !string.IsNullOrWhiteSpace(completionCode),
 				Title = regex.Groups["title"].Value,
 				Tags = new List<string>(),
 			};
