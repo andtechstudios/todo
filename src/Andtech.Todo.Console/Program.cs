@@ -16,10 +16,11 @@ public partial class Program
 
 	public static async Task Main(string[] args)
 	{
-		var result = Parser.Default.ParseArguments<BaseOptions, InteractiveOperation.Options, LintOperation.Options>(args);
+		var result = Parser.Default.ParseArguments<BaseOptions, InteractiveOperation.Options, LintOperation.Options, ParseOperation.Options>(args);
 		await result.WithParsedAsync<BaseOptions>(OnPreParseAsync);
 		await result.WithParsedAsync<InteractiveOperation.Options>(InteractiveOperation.OnParseAsync);
 		await result.WithParsedAsync<LintOperation.Options>(LintOperation.OnParseAsync);
+		await result.WithParsedAsync<ParseOperation.Options>(ParseOperation.OnParseAsync);
 	}
 
 	static async Task OnPreParseAsync(BaseOptions options)
