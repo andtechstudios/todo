@@ -2,6 +2,7 @@
 using Andtech.Todo.Console.Editor;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using static Crayon.Output;
 
 public class TaskNode : IEditorNode, IIndentable
@@ -11,29 +12,38 @@ public class TaskNode : IEditorNode, IIndentable
 	private readonly TodoTask task;
 	private string text;
 
+	private static readonly Regex LinkRegex = new Regex(@"\[(?<text>.+?)\]\((?<url>.+?)\)");
+
 	public TaskNode(TodoTask task)
 	{
 		this.task = task;
 	}
 
+	public static string TerminalURL(string caption, string url) => $"\u001B]8;;{url}\a{caption}\u001B]8;;\a";
+
 	public void Rebuild(int width)
 	{
 		var symbol = task.IsCompleted ? "⦿" : "◯";
-		var content = task.Title;
-		var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level));
+		var content = task.Title + (string.IsNullOrEmpty(task.Description) ? string.Empty : ":");
+		var description = LinkRegex.Replace(task.Description, FormatLink);
+		var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level)); 
+
+		string FormatLink(Match match)
+		{
+			var text = match.Groups["text"].Value;
+			var url = match.Groups["url"].Value;
+			return TerminalURL(text, url);
+		}
 
 		text = string.Join(" ",
 			indentation,
 			symbol,
 			content,
-			task.Description
-			);
+			description
+		);
 
-		if (text.Length > width - 1)
-		{
-			text = text.Substring(0, width - 1) + "…";
-		}
-		text += string.Join(string.Empty, Enumerable.Repeat(" ", width - text.Length));
+		var count = Math.Max(0, width - text.Length);
+		text += string.Join(string.Empty, Enumerable.Repeat(" ", count));
 	}
 
 	void IEditorNode.Submit()
