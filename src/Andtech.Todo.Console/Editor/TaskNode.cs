@@ -1,4 +1,5 @@
 ﻿using Andtech.Todo;
+using Andtech.Todo.Console;
 using Andtech.Todo.Console.Editor;
 using System;
 using System.Linq;
@@ -19,20 +20,26 @@ public class TaskNode : IEditorNode, IIndentable
 		this.task = task;
 	}
 
-	public static string TerminalURL(string caption, string url) => $"\u001B]8;;{url}\a{caption}\u001B]8;;\a";
-
 	public void Rebuild(int width)
 	{
 		var symbol = task.IsCompleted ? "⦿" : "◯";
-		var content = task.Title + (string.IsNullOrEmpty(task.Description) ? string.Empty : ":");
-		var description = LinkRegex.Replace(task.Description, FormatLink);
+		var title = ProcessMarkdown(task.Title);
+		var description = ProcessMarkdown(task.Description);
+
+		var content = title + (string.IsNullOrEmpty(description) ? string.Empty : ":");
 		var indentation = string.Join(string.Empty, Enumerable.Repeat("  ", task.Level)); 
 
-		string FormatLink(Match match)
+		string ProcessMarkdown(string text)
 		{
-			var text = match.Groups["text"].Value;
-			var url = match.Groups["url"].Value;
-			return TerminalURL(text, url);
+			text = LinkRegex.Replace(text, ProcessURL);
+			return text;
+
+			string ProcessURL(Match match)
+			{
+				var text = match.Groups["text"].Value;
+				var url = match.Groups["url"].Value;
+				return Macros.TerminalURL(text, url);
+			}
 		}
 
 		text = string.Join(" ",

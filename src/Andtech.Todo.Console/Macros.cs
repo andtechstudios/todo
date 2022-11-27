@@ -10,6 +10,8 @@ namespace Andtech.Todo.Console
 	internal static class Macros
 	{
 
+		public static string TerminalURL(string caption, string url) => $"\u001B]8;;{url}\a{caption}\u001B]8;;\a";
+
 		public static void Swap<T>(this List<T> list, int a, int b)
 		{
 			var temp = list[b];
