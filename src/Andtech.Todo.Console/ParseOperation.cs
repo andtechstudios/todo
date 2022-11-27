@@ -24,7 +24,7 @@ namespace Andtech.Todo.Console
 		public static async Task OnParseAsync(Options options)
 		{
 			Log.WriteLine(TodoTask.ContentRegex.ToString(), Verbosity.diagnostic);
-			Log.WriteLine(TodoTask.BodyRegex.ToString(), Verbosity.diagnostic);
+			Log.WriteLine(TodoTask.BodySplitRegex.ToString(), Verbosity.diagnostic);
 			Log.WriteLine(TodoTask.MetadataRegex.ToString(), Verbosity.diagnostic);
 
 			var task = TodoTask.Parse(options.Expression);

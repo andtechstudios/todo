@@ -17,8 +17,8 @@ namespace Andtech.Todo
 		public int Level { get; set; }
 
 		public static readonly Regex ContentRegex = new Regex(@$"({BulletExpression})?\s*({StatusExpression})?\s*(?<body>.+)");
-		public static readonly Regex BodyRegex = new Regex(@"(?<title>[^:]+)(:\s+(?<description>.+))?");
 		public static readonly Regex MetadataRegex = new Regex(@$"(\s+({TagExpression}|{DueExpression}|{AssigneeExpression}))+$");
+		public static readonly Regex BodySplitRegex = new Regex(@"(?<!(\[|\()[^[\\(]]*):(?![^[\]\)]*(\]|\)))");
 
 		private const string BulletExpression = @"\*|-|\d+\.";
 		private const string StatusExpression= @"\[(?<complete> |x)\]";
@@ -50,9 +50,9 @@ namespace Andtech.Todo
 			var completionCode = contentMatch.Groups["complete"].Value;
 			task.IsCompleted = !string.IsNullOrWhiteSpace(completionCode);
 
-			var bodyMatch = BodyRegex.Match(contentMatch.Groups["body"].Value);
-			task.Title = bodyMatch.Groups["title"].Value;
-			task.Description = bodyMatch.Groups["description"].Value;
+			var tokens = BodySplitRegex.Split(contentMatch.Groups["body"].Value, 2);
+			task.Title = tokens[0];
+			task.Description = tokens.Length > 1 ? tokens[1].Trim() : string.Empty;
 
 			return task;
 		}
