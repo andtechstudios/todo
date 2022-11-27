@@ -29,6 +29,10 @@ public class TaskNode : IEditorNode, IIndentable
 			task.Description
 			);
 
+		if (text.Length > width - 1)
+		{
+			text = text.Substring(0, width - 1) + "…";
+		}
 		text += string.Join(string.Empty, Enumerable.Repeat(" ", width - text.Length));
 	}
 
