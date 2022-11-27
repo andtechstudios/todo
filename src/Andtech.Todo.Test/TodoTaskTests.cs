@@ -15,21 +15,21 @@ namespace Andtech.Todo.Test
 		public void ParseBullet()
 		{
 			var task = TodoTask.Parse("* Call Saul");
-			Assert.That(task.Title, Is.EqualTo("Call Saul"));
+			Assert.Pass();
 		}
 
 		[Test]
 		public void ParseDash()
 		{
 			var task = TodoTask.Parse("- Call Saul");
-			Assert.That(task.Title, Is.EqualTo("Call Saul"));
+			Assert.Pass();
 		}
 
 		[Test]
 		public void ParseNumbering()
 		{
 			var task = TodoTask.Parse("22. Call Saul");
-			Assert.That(task.Title, Is.EqualTo("Call Saul"));
+			Assert.Pass();
 		}
 
 		[Test]
@@ -38,6 +38,14 @@ namespace Andtech.Todo.Test
 			var task = TodoTask.Parse("* Call Saul");
 			Assert.That(task.Title, Is.EqualTo("Call Saul"));
 			Assert.That(task.IsCompleted, Is.EqualTo(false));
+		}
+
+		[Test]
+		public void ParseWithMarkdownLink()
+		{
+			var task = TodoTask.Parse("* Call Saul: visit [Saul's Website](http://bettercallsaul.amc.com/) for details.");
+			Assert.That(task.Title, Is.EqualTo("Call Saul"));
+			Assert.That(task.Description, Is.EqualTo("visit [Saul's Website](http://bettercallsaul.amc.com/) for details."));
 		}
 	}
 }
