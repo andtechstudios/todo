@@ -11,7 +11,7 @@ namespace Andtech.Todo
 		public List<string> Tags { get; set; }
 		public int Level { get; set; }
 
-		private static readonly Regex TaskRegex = new Regex(@"^\s*(\*|-)\s*(\[(?<complete> |x)\]\s*)?(?<title>.*)\s*$");
+		private static readonly Regex TaskRegex = new Regex(@"^\s*(\*|-|\d+\.)?\s*(\[(?<complete> |x)\]\s*)?(?<title>.*)\s*$");
 
 		public static TodoTask Parse(string text)
 		{
