@@ -3,6 +3,8 @@ using Spectre.Console;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +23,30 @@ namespace Andtech.Todo.Console
 
 		public static async Task OnParseAsync(Options options)
 		{
-			await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, ChooseAsync);
+			await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, AlternateScreen);
+		}
+
+		static string GetCachedFilePath()
+		{
+			if (File.Exists(Session.Instance.Cache.LastAccessedTodoFile))
+			{
+				return Session.Instance.Cache.LastAccessedTodoFile;
+			}
+
+			return null;
+		}
+
+		static async Task AlternateScreen()
+		{
+			var filePath = GetCachedFilePath();
+			if (string.IsNullOrEmpty(filePath))
+			{
+				await LoadFileAsync();
+			}
+			else
+			{
+				Session.Instance.TodoList = TodoList.Read(filePath);
+			}
 
 			cts = new CancellationTokenSource();
 			var token = cts.Token;
@@ -44,24 +69,25 @@ namespace Andtech.Todo.Console
 			}
 		}
 
-		public static async Task ChooseAsync()
+		public static async Task LoadFileAsync()
 		{
+			string path;
 			if (File.Exists(Session.Instance.ProjectPath))
 			{
-				Session.Instance.TodoList = TodoList.Read(Session.Instance.ProjectPath);
+				path = Session.Instance.ProjectPath;
 			}
 			else
 			{
 				var files = Directory.EnumerateFiles(Session.Instance.ProjectPath, "*.md");
-
-				var result = AnsiConsole.Prompt(
+				path = AnsiConsole.Prompt(
 					new SelectionPrompt<string>()
 						.Title("Choose todo file:")
 						.AddChoices(files)
 				);
 
-				Session.Instance.TodoList = TodoList.Read(result);
 			}
+			Session.Instance.TodoList = TodoList.Read(path);
+			Session.Instance.RememberTodoFilePath(path);
 		}
 	}
 }

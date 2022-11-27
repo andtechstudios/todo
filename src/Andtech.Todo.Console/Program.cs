@@ -8,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 public partial class Program
 {
@@ -34,6 +36,16 @@ public partial class Program
 		{
 			ProjectPath = path,
 		};
+
+		try
+		{
+			var text = File.ReadAllText(Session.Instance.CachePath);
+			Session.Instance.Cache = JsonSerializer.Deserialize<Cache>(text);
+		}
+		catch
+		{
+			Session.Instance.Cache = new Cache();
+		}
 	}
 }
 
