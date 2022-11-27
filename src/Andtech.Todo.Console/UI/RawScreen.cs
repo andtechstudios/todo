@@ -1,6 +1,7 @@
 ﻿using Andtech.Todo.Console;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using static Crayon.Output;
 
@@ -53,7 +54,10 @@ public class RawScreen
 		Console.CursorVisible = false;
 		Console.CursorTop = Console.BufferHeight - 1;
 		Console.CursorLeft = 0;
-		Console.Write($"Ln {window.CursorLineNumber + 1} | {Session.Instance.Log}");
+
+		var name = Path.GetFileNameWithoutExtension(Session.Instance.TodoList.Path);
+		var footer = $"{name} • Ln {window.CursorLineNumber + 1} • {Session.Instance.Log}";
+		Console.Write(Dim(footer));
 		Console.SetCursorPosition(0, window.CursorLineNumber - window.WindowLineNumber);
 	}
 }
