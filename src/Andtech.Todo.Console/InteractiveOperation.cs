@@ -41,19 +41,26 @@ namespace Andtech.Todo.Console
 			var filePath = GetCachedFilePath();
 			if (string.IsNullOrEmpty(filePath))
 			{
-				await LoadFileAsync();
+				LoadFile();
 			}
 			else
 			{
 				Session.Instance.TodoList = TodoList.Read(filePath);
 			}
 
+		Run:
 			cts = new CancellationTokenSource();
 			var token = cts.Token;
 			var subroutine = new EditorSubroutine(Session.Instance.TodoList);
-			await SpectreExtensions.AlternateScreenAsync(AnsiConsole.Console, () => subroutine.RunAsync(cancellationToken: token));
+			await subroutine.RunAsync(cancellationToken: token);
 			cts.Cancel();
 			cts.Dispose();
+
+			if (subroutine.ExitCode != 0)
+			{
+				LoadFile();
+				goto Run;
+			}
 
 			if (Session.Instance.CanWrite)
 			{
@@ -69,7 +76,7 @@ namespace Andtech.Todo.Console
 			}
 		}
 
-		public static async Task LoadFileAsync()
+		public static void LoadFile()
 		{
 			string path;
 			if (File.Exists(Session.Instance.ProjectPath))
@@ -78,13 +85,13 @@ namespace Andtech.Todo.Console
 			}
 			else
 			{
+				AnsiConsole.Clear();
 				var files = Directory.EnumerateFiles(Session.Instance.ProjectPath, "*.md");
 				path = AnsiConsole.Prompt(
 					new SelectionPrompt<string>()
 						.Title("Choose todo file:")
 						.AddChoices(files)
 				);
-
 			}
 			Session.Instance.TodoList = TodoList.Read(path);
 			Session.Instance.RememberTodoFilePath(path);

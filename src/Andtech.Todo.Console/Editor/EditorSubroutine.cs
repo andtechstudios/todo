@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 public class EditorSubroutine
 {
+	public int ExitCode { get; private set; }
 	private readonly Editor editor;
 
 	public EditorSubroutine(TodoList todoList)
@@ -29,6 +30,7 @@ public class EditorSubroutine
 		input.Actions.Add(new Command(ConsoleKey.Tab), editor.IncreaseLevel);
 		input.Actions.Add(new Command(ConsoleKey.Tab, ConsoleModifiers.Shift), editor.DecreaseLevel);
 		input.Actions.Add(new Command(ConsoleKey.N, ConsoleModifiers.Control), Create);
+		input.Actions.Add(new Command(ConsoleKey.O, ConsoleModifiers.Control), OpenFile);
 
 		editor.Screen.DrawImmediate();
 
@@ -60,6 +62,12 @@ public class EditorSubroutine
 
 		void Input_OnQuit()
 		{
+			cts?.Cancel();
+		}
+
+		void OpenFile()
+		{
+			ExitCode = 1;
 			cts?.Cancel();
 		}
 	}
